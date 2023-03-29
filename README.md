@@ -16,19 +16,21 @@
 
 - 피드 공유 : 추천 받은 코디를 다른 사람들과 공유하는 소통의 장이 마련되어 있습니다. 자신의 코디를 남들에게 뽐내고, 타인의 코디를 참고하는 등 활발한 참여를 해보세요
 
-
 ## 2. 소개 영상
 
 comming soom
 
 ### 3. 팀 소개
 
+|박병규|손문기|육종호|김재민|
+|--|--|--|--|
+|<img width="200px" src="https://avatars.githubusercontent.com/u/39543006?v=4">|--|--|--|
+|xxxx1612|xxxx1629|xxxx1650|xxxx1592|
+|Team Leader, AI, Data Mining|BackEnd|Front-End, UI/UX 디자인 기획|BackEnd|
+|[Bingurrr](https://github.com/Bingurrr)|--|--|--|
+|--|--|--|--|
+
 팀을 소개하세요.
-| 박병규 | 손문기 | 육종호 | 김재민 |
-| --- | --- | --- | --- |
-|  |  |  |  |
-| 학번: xxxx1612 | 학번:xxxx1629 | 학번: xxxx1650 | 학번: xxxx1592 |
-| Team Leader, AI, Data Mining | BackEnd | Front-End, UI/UX 디자인 기획 | BackEnd |
 
 팀원정보 및 담당이나 사진 및 SNS를 이용하여 소개하세요.
 
