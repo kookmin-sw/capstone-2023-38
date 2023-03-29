@@ -24,6 +24,11 @@ comming soom
 ### 3. 팀 소개
 
 팀을 소개하세요.
+| 박병규 | 손문기 | 육종호 | 김재민 |
+| --- | --- | --- | --- |
+|  |  |  |  |
+| 학번: xxxx1612 | 학번:xxxx1629 | 학번: xxxx1650 | 학번: xxxx1592 |
+| Team Leader, AI, Data Mining | BackEnd | Front-End, UI/UX 디자인 기획 | BackEnd |
 
 팀원정보 및 담당이나 사진 및 SNS를 이용하여 소개하세요.
 
