@@ -27,13 +27,8 @@ comming soom
 |Team Leader, AI|BackEnd|Front-End, UI/UX 디자인 기획|BackEnd|
 |[Bingurrr](https://github.com/Bingurrr)|--|--|--|
 
-팀을 소개하세요.
-
-팀원정보 및 담당이나 사진 및 SNS를 이용하여 소개하세요.
 
 ### 4. 사용법
-
-소스코드제출시 설치법이나 사용법을 작성하세요.
 
 comming soon
 
