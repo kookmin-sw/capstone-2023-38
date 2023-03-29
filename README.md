@@ -21,11 +21,10 @@
 comming soom
 
 ### 3. 팀 소개
-https://user-images.githubusercontent.com/39684697/228555865-2170e9dd-28ef-4a6b-9303-0d5dd11883e4.jpeg
 
 |박병규|손문기|육종호|김재민|
 |--|--|--|--|
-|<img width="200px" height="200px" src="https://avatars.githubusercontent.com/u/39543006?v=4">|--|<img width="200px" height="200px" src="https://user-images.githubusercontent.com/39684697/228555865-2170e9dd-28ef-4a6b-9303-0d5dd11883e4.jpeg">|--|
+|<img width="200px" height="200px" src="https://avatars.githubusercontent.com/u/39543006?v=4">|--|<img width="200px" height="200px" src="https://user-images.githubusercontent.com/39684697/228556629-900760fa-ca27-4361-83bd-dde1c50f8208.jpeg">|--|
 |xxxx1612|xxxx1629|xxxx1650|xxxx1592|
 |Team Leader, AI, Data Mining|BackEnd|Front-End, UI/UX 디자인 기획|BackEnd|
 |[Bingurrr](https://github.com/Bingurrr)|--|--|--|
