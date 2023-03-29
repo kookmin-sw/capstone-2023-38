@@ -26,7 +26,7 @@ comming soom
 |:---:|:---:|:---:|:---:|
 |<img width="150px" height="150px" src="https://avatars.githubusercontent.com/u/39543006?v=4">|<img width="150px" height="150px" src="https://user-images.githubusercontent.com/39684860/228559034-982cf6f3-403f-44d1-9995-523c69c939db.jpg">|<img width="150px" height="150px" src="https://user-images.githubusercontent.com/39684697/228556629-900760fa-ca27-4361-83bd-dde1c50f8208.jpeg">|--|
 |xxxx1612|xxxx1629|xxxx1650|xxxx1592|
-|Team Leader, AI, Data Mining|BackEnd|Front-End, UI/UX 디자인 기획|BackEnd|
+|Team Leader, AI|BackEnd|Front-End, UI/UX 디자인 기획|BackEnd|
 |[Bingurrr](https://github.com/Bingurrr)|--|--|--|
 |--|--|--|--|
 
