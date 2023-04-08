@@ -48,10 +48,11 @@ public class Functions {
     private String bucket7;
 
     private String userID = null;
-
     public void setUserID(String userID) {
         this.userID = userID;
     }
+
+    //-----------------------------------임시 옷장 등록 기능--------------------------------------------------------
     public List<String> uploadUrlsTempCloset(List<String> imageUrls, String userId) throws IOException {
         List<String> uploadedImageUrls = new ArrayList<>();
         setUserID(userId);
@@ -64,7 +65,6 @@ public class Functions {
         }
         return uploadedImageUrls;
     }
-
     public String uploadTempCloset(File uploadFile) {
         String fileName = uploadFile.getName();
         String uploadImageUrl = putS3TempCloset(uploadFile, fileName);
@@ -73,7 +73,6 @@ public class Functions {
 
         return uploadImageUrl;
     }
-
     private String putS3TempCloset(File uploadFile, String fileName) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.addUserMetadata("user-id", userID);
@@ -85,7 +84,6 @@ public class Functions {
         );
         return amazonS3.getUrl(bucket5_outer, fileName).toString();
     }
-
     public List<String> uploadUrlsTempCloset2(List<String> imageUrls, String userId) throws IOException {
         List<String> uploadedImageUrls = new ArrayList<>();
         setUserID(userId);
@@ -98,7 +96,6 @@ public class Functions {
         }
         return uploadedImageUrls;
     }
-
     public String uploadTempCloset2(File uploadFile) {
         String fileName = uploadFile.getName();
         String uploadImageUrl = putS3TempCloset2(uploadFile, fileName);
@@ -107,7 +104,6 @@ public class Functions {
 
         return uploadImageUrl;
     }
-
     private String putS3TempCloset2(File uploadFile, String fileName) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.addUserMetadata("user-id", userID);
@@ -132,7 +128,6 @@ public class Functions {
         }
         return uploadedImageUrls;
     }
-
     public String uploadTempCloset3(File uploadFile) {
         String fileName = uploadFile.getName();
         String uploadImageUrl = putS3TempCloset3(uploadFile, fileName);
@@ -141,7 +136,6 @@ public class Functions {
 
         return uploadImageUrl;
     }
-
     private String putS3TempCloset3(File uploadFile, String fileName) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.addUserMetadata("user-id", userID);
@@ -153,7 +147,6 @@ public class Functions {
         );
         return amazonS3.getUrl(bucket5_shoes, fileName).toString();
     }
-
     public List<String> uploadUrlsTempCloset4(List<String> imageUrls, String userId) throws IOException {
         List<String> uploadedImageUrls = new ArrayList<>();
         setUserID(userId);
@@ -166,7 +159,6 @@ public class Functions {
         }
         return uploadedImageUrls;
     }
-
     public String uploadTempCloset4(File uploadFile) {
         String fileName = uploadFile.getName();
         String uploadImageUrl = putS3TempCloset4(uploadFile, fileName);
@@ -175,7 +167,6 @@ public class Functions {
 
         return uploadImageUrl;
     }
-
     private String putS3TempCloset4(File uploadFile, String fileName) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
         objectMetadata.addUserMetadata("user-id", userID);
@@ -187,6 +178,9 @@ public class Functions {
         );
         return amazonS3.getUrl(bucket5_pants, fileName).toString();
     }
+    //---------------------------------------------------------------------------------------------------
+
+    //--------------------------------피드 페이지 등록 기능--------------------------------------------------
     public List<String> uploadUrlsFeed(List<String> imageUrls, String userId, int wcount, int acount) throws IOException {
         List<String> uploadedImageUrls = new ArrayList<>();
         for (String imageUrl : imageUrls) {
@@ -198,7 +192,6 @@ public class Functions {
         }
         return uploadedImageUrls;
     }
-
     public String uploadFeed(File uploadFile, String userId, int wcount, int acount) {
         String fileName = uploadFile.getName();
         String uploadImageUrl = putS3Feed(uploadFile, fileName, userId, wcount, acount);
@@ -207,7 +200,6 @@ public class Functions {
 
         return uploadImageUrl;
     }
-
     private String putS3Feed(File uploadFile, String fileName, String userId, int wcount, int acount) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
 
@@ -224,7 +216,9 @@ public class Functions {
         );
         return amazonS3.getUrl(bucket2, fileName).toString();
     }
+     //------------------------------------------------------------------------------------------------
 
+    //-----------------------------------위시리스트 등록 기능---------------------------------------------
     public List<String> uploadUrlsWishlist(List<String> imageUrls, String userId) throws IOException {
         List<String> uploadedImageUrls = new ArrayList<>();
         setUserID(userId);
@@ -237,7 +231,6 @@ public class Functions {
         }
         return uploadedImageUrls;
     }
-
     public String uploadWishlist(File uploadFile) {
         String fileName = uploadFile.getName();
         String uploadImageUrl = putS3Wishlist(uploadFile, fileName);
@@ -246,7 +239,6 @@ public class Functions {
 
         return uploadImageUrl;
     }
-
     private String putS3Wishlist(File uploadFile, String fileName) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
 
@@ -260,6 +252,42 @@ public class Functions {
         );
         return amazonS3.getUrl(bucket3, fileName).toString();
     }
+   //-----------------------------------------------------------------------------------------------
+
+    //-----------------------------추천 받을 이미지 임시 등록 기능---------------------------------------
+    public List<String> uploadUrlsRecStart(List<String> imageUrls, String userId) throws IOException {
+        List<String> uploadedImageUrls = new ArrayList<>();
+        setUserID(userId);
+        for (String imageUrl : imageUrls) {
+            URL url = new URL(imageUrl);
+            File downloadFile = download(url)
+                    .orElseThrow(() -> new IllegalArgumentException("URL 다운로드 실패"));
+            String uploadedImageUrl = uploadWishlistRecStart(downloadFile);
+            uploadedImageUrls.add(uploadedImageUrl);
+        }
+        return uploadedImageUrls;
+    }
+    public String uploadWishlistRecStart(File uploadFile) {
+        String fileName = uploadFile.getName();
+        String uploadImageUrl = putS3WishlistRecStart(uploadFile, fileName);
+
+        removeNewFile(uploadFile);
+
+        return uploadImageUrl;
+    }
+    private String putS3WishlistRecStart(File uploadFile, String fileName) {
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.addUserMetadata("user-id", userID);
+
+        amazonS3.putObject(
+                new PutObjectRequest(bucket7, fileName, uploadFile)
+                        .withCannedAcl(CannedAccessControlList.PublicRead)
+                        .withMetadata(objectMetadata)
+        );
+        return amazonS3.getUrl(bucket7, fileName).toString();
+    }
+  //---------------------------------------------------------------------------------------------
+
 
     private void removeNewFile(File targetFile) {
         if (targetFile.delete()) {

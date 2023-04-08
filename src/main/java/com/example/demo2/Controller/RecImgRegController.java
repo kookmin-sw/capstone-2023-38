@@ -4,15 +4,14 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.example.demo2.domian.RecStartData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -65,5 +64,16 @@ public class RecImgRegController {
         if (folderName.contains("outer")) return "outer";
         if (folderName.contains("shoes")) return "shoes";
         return "etc";
+    }
+
+    @PostMapping("/uploadRecStart")  //위시리스트에 이미지를 업로드하는 기능
+    public ResponseEntity<List<String>> uploadImageUrls(@RequestBody RecStartData request) {
+        try {
+            List<String> uploadedImageUrls = functions.uploadUrlsRecStart(request.getImageUrls(), request.getUserId());
+            return ResponseEntity.ok(uploadedImageUrls);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
