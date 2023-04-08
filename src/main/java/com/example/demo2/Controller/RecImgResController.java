@@ -38,7 +38,7 @@ public class RecImgResController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    @GetMapping("/getRecResult/{id}")
+    @GetMapping("/getRecResult/{id}")   //추천 받은 이미지 보여주기
     public ResponseEntity<List<Map<String, Object>>> getImageUrlsById(@PathVariable String id) throws IOException {
         List<Map<String, Object>> response = new ArrayList<>();
         List<Map<String, Object>> imageUrls = new ArrayList<>();

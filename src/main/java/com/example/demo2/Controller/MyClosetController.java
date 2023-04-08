@@ -76,7 +76,7 @@ public class MyClosetController {
         }
     }
 
-    @PostMapping("/uploadTempCloset_outer")  //위시리스트에 이미지를 업로드하는 기능
+    @PostMapping("/uploadTempCloset_outer")  //임시 옷장에 이미지를 업로드하는 기능
     public ResponseEntity<List<String>> uploadImageUrls(@RequestBody MyClosetData request) {
         try {
             List<String> uploadedImageUrls = functions.uploadUrlsTempCloset(request.getImageUrls(), request.getUserId());
@@ -87,7 +87,7 @@ public class MyClosetController {
         }
     }
 
-    @PostMapping("/uploadTempCloset_top")  //위시리스트에 이미지를 업로드하는 기능
+    @PostMapping("/uploadTempCloset_top")  //임시 옷장에 이미지를 업로드하는 기능
     public ResponseEntity<List<String>> uploadImageUrls2(@RequestBody MyClosetData request) {
         try {
             List<String> uploadedImageUrls = functions.uploadUrlsTempCloset2(request.getImageUrls(), request.getUserId());
@@ -98,7 +98,7 @@ public class MyClosetController {
         }
     }
 
-    @PostMapping("/uploadTempCloset_shoes")  //위시리스트에 이미지를 업로드하는 기능
+    @PostMapping("/uploadTempCloset_shoes")  //임시 옷장에 이미지를 업로드하는 기능
     public ResponseEntity<List<String>> uploadImageUrls3(@RequestBody MyClosetData request) {
         try {
             List<String> uploadedImageUrls = functions.uploadUrlsTempCloset3(request.getImageUrls(), request.getUserId());
@@ -109,7 +109,7 @@ public class MyClosetController {
         }
     }
 
-    @PostMapping("/uploadTempCloset_pants")  //위시리스트에 이미지를 업로드하는 기능
+    @PostMapping("/uploadTempCloset_pants")  //임시 옷장에 이미지를 업로드하는 기능
     public ResponseEntity<List<String>> uploadImageUrls4(@RequestBody MyClosetData request) {
         try {
             List<String> uploadedImageUrls = functions.uploadUrlsTempCloset4(request.getImageUrls(), request.getUserId());
