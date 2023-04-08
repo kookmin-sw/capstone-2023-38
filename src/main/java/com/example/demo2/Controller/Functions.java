@@ -32,52 +32,161 @@ public class Functions {
     @Value("${cloud.aws.s3.bucket4}")
     private String bucket4;
 
+    @Value("${cloud.aws.s3.bucket5}/outer")
+    private String bucket5_outer;
+    @Value("${cloud.aws.s3.bucket5}/top")
+    private String bucket5_top;
+    @Value("${cloud.aws.s3.bucket5}/shoes")
+    private String bucket5_shoes;
+    @Value("${cloud.aws.s3.bucket5}/pants")
+    private String bucket5_pants;
+
+    @Value("${cloud.aws.s3.bucket6}")
+    private String bucket6;
+
+    @Value("${cloud.aws.s3.bucket7}")
+    private String bucket7;
+
     private String userID = null;
 
     public void setUserID(String userID) {
         this.userID = userID;
     }
-
-    public List<String> uploadUrls(List<String> imageUrls, int temperature, String userId) throws IOException {
+    public List<String> uploadUrlsTempCloset(List<String> imageUrls, String userId) throws IOException {
         List<String> uploadedImageUrls = new ArrayList<>();
         setUserID(userId);
         for (String imageUrl : imageUrls) {
             URL url = new URL(imageUrl);
             File downloadFile = download(url)
                     .orElseThrow(() -> new IllegalArgumentException("URL 다운로드 실패"));
-            String uploadedImageUrl = upload(downloadFile, temperature);
+            String uploadedImageUrl = uploadTempCloset(downloadFile);
             uploadedImageUrls.add(uploadedImageUrl);
         }
         return uploadedImageUrls;
     }
 
-    public String upload(File uploadFile, int temperature) {
+    public String uploadTempCloset(File uploadFile) {
         String fileName = uploadFile.getName();
-        String uploadImageUrl = putS3(uploadFile, fileName, temperature);
+        String uploadImageUrl = putS3TempCloset(uploadFile, fileName);
 
         removeNewFile(uploadFile);
 
         return uploadImageUrl;
     }
 
-    private String putS3(File uploadFile, String fileName, int temperature) {
+    private String putS3TempCloset(File uploadFile, String fileName) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
-
-        // Save temperature metadata as a string value
-        String temperatureString = Integer.toString(temperature);
-        objectMetadata.addUserMetadata("temperature", temperatureString);
-
         objectMetadata.addUserMetadata("user-id", userID);
-        //objectMetadata.addUserMetadata("upload-time", new Date().toString());
 
         amazonS3.putObject(
-                new PutObjectRequest(bucket, fileName, uploadFile)
+                new PutObjectRequest(bucket5_outer, fileName, uploadFile)
                         .withCannedAcl(CannedAccessControlList.PublicRead)
                         .withMetadata(objectMetadata)
         );
-        return amazonS3.getUrl(bucket, fileName).toString();
+        return amazonS3.getUrl(bucket5_outer, fileName).toString();
     }
 
+    public List<String> uploadUrlsTempCloset2(List<String> imageUrls, String userId) throws IOException {
+        List<String> uploadedImageUrls = new ArrayList<>();
+        setUserID(userId);
+        for (String imageUrl : imageUrls) {
+            URL url = new URL(imageUrl);
+            File downloadFile = download(url)
+                    .orElseThrow(() -> new IllegalArgumentException("URL 다운로드 실패"));
+            String uploadedImageUrl = uploadTempCloset2(downloadFile);
+            uploadedImageUrls.add(uploadedImageUrl);
+        }
+        return uploadedImageUrls;
+    }
+
+    public String uploadTempCloset2(File uploadFile) {
+        String fileName = uploadFile.getName();
+        String uploadImageUrl = putS3TempCloset2(uploadFile, fileName);
+
+        removeNewFile(uploadFile);
+
+        return uploadImageUrl;
+    }
+
+    private String putS3TempCloset2(File uploadFile, String fileName) {
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.addUserMetadata("user-id", userID);
+
+        amazonS3.putObject(
+                new PutObjectRequest(bucket5_top, fileName, uploadFile)
+                        .withCannedAcl(CannedAccessControlList.PublicRead)
+                        .withMetadata(objectMetadata)
+        );
+        return amazonS3.getUrl(bucket5_top, fileName).toString();
+    }
+
+    public List<String> uploadUrlsTempCloset3(List<String> imageUrls, String userId) throws IOException {
+        List<String> uploadedImageUrls = new ArrayList<>();
+        setUserID(userId);
+        for (String imageUrl : imageUrls) {
+            URL url = new URL(imageUrl);
+            File downloadFile = download(url)
+                    .orElseThrow(() -> new IllegalArgumentException("URL 다운로드 실패"));
+            String uploadedImageUrl = uploadTempCloset3(downloadFile);
+            uploadedImageUrls.add(uploadedImageUrl);
+        }
+        return uploadedImageUrls;
+    }
+
+    public String uploadTempCloset3(File uploadFile) {
+        String fileName = uploadFile.getName();
+        String uploadImageUrl = putS3TempCloset3(uploadFile, fileName);
+
+        removeNewFile(uploadFile);
+
+        return uploadImageUrl;
+    }
+
+    private String putS3TempCloset3(File uploadFile, String fileName) {
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.addUserMetadata("user-id", userID);
+
+        amazonS3.putObject(
+                new PutObjectRequest(bucket5_shoes, fileName, uploadFile)
+                        .withCannedAcl(CannedAccessControlList.PublicRead)
+                        .withMetadata(objectMetadata)
+        );
+        return amazonS3.getUrl(bucket5_shoes, fileName).toString();
+    }
+
+    public List<String> uploadUrlsTempCloset4(List<String> imageUrls, String userId) throws IOException {
+        List<String> uploadedImageUrls = new ArrayList<>();
+        setUserID(userId);
+        for (String imageUrl : imageUrls) {
+            URL url = new URL(imageUrl);
+            File downloadFile = download(url)
+                    .orElseThrow(() -> new IllegalArgumentException("URL 다운로드 실패"));
+            String uploadedImageUrl = uploadTempCloset4(downloadFile);
+            uploadedImageUrls.add(uploadedImageUrl);
+        }
+        return uploadedImageUrls;
+    }
+
+    public String uploadTempCloset4(File uploadFile) {
+        String fileName = uploadFile.getName();
+        String uploadImageUrl = putS3TempCloset4(uploadFile, fileName);
+
+        removeNewFile(uploadFile);
+
+        return uploadImageUrl;
+    }
+
+    private String putS3TempCloset4(File uploadFile, String fileName) {
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.addUserMetadata("user-id", userID);
+
+        amazonS3.putObject(
+                new PutObjectRequest(bucket5_pants, fileName, uploadFile)
+                        .withCannedAcl(CannedAccessControlList.PublicRead)
+                        .withMetadata(objectMetadata)
+        );
+        return amazonS3.getUrl(bucket5_pants, fileName).toString();
+    }
     public List<String> uploadUrlsFeed(List<String> imageUrls, String userId, int wcount, int acount) throws IOException {
         List<String> uploadedImageUrls = new ArrayList<>();
         for (String imageUrl : imageUrls) {
@@ -115,8 +224,6 @@ public class Functions {
         );
         return amazonS3.getUrl(bucket2, fileName).toString();
     }
-
-
 
     public List<String> uploadUrlsWishlist(List<String> imageUrls, String userId) throws IOException {
         List<String> uploadedImageUrls = new ArrayList<>();
@@ -212,8 +319,6 @@ public class Functions {
 
         amazonS3.copyObject(copyObjectMetadataRequest);
     }
-
-
     private String getFileNameFromUrl(String imageUrl) {
         int slashIndex = imageUrl.lastIndexOf('/');
         int questionMarkIndex = imageUrl.lastIndexOf('?');

@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.example.demo2.domian.MyClosetData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -70,6 +71,50 @@ public class MyClosetController {
             functions.deleteMycloset(imageUrl);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/uploadTempCloset_outer")  //위시리스트에 이미지를 업로드하는 기능
+    public ResponseEntity<List<String>> uploadImageUrls(@RequestBody MyClosetData request) {
+        try {
+            List<String> uploadedImageUrls = functions.uploadUrlsTempCloset(request.getImageUrls(), request.getUserId());
+            return ResponseEntity.ok(uploadedImageUrls);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/uploadTempCloset_top")  //위시리스트에 이미지를 업로드하는 기능
+    public ResponseEntity<List<String>> uploadImageUrls2(@RequestBody MyClosetData request) {
+        try {
+            List<String> uploadedImageUrls = functions.uploadUrlsTempCloset2(request.getImageUrls(), request.getUserId());
+            return ResponseEntity.ok(uploadedImageUrls);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/uploadTempCloset_shoes")  //위시리스트에 이미지를 업로드하는 기능
+    public ResponseEntity<List<String>> uploadImageUrls3(@RequestBody MyClosetData request) {
+        try {
+            List<String> uploadedImageUrls = functions.uploadUrlsTempCloset3(request.getImageUrls(), request.getUserId());
+            return ResponseEntity.ok(uploadedImageUrls);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/uploadTempCloset_pants")  //위시리스트에 이미지를 업로드하는 기능
+    public ResponseEntity<List<String>> uploadImageUrls4(@RequestBody MyClosetData request) {
+        try {
+            List<String> uploadedImageUrls = functions.uploadUrlsTempCloset4(request.getImageUrls(), request.getUserId());
+            return ResponseEntity.ok(uploadedImageUrls);
+        } catch (IOException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
