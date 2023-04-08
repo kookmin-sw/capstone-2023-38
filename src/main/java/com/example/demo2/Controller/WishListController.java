@@ -23,9 +23,6 @@ public class WishListController {
     private final AmazonS3 amazonS3;
     private final Functions functions;
 
-    @Value("${cloud.aws.s3.bucket2}")
-    private String bucket2;
-
     @Value("${cloud.aws.s3.bucket3}")
     private String bucket3;
 
