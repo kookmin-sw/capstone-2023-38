@@ -207,7 +207,6 @@ public class FeedPageController {
         return ResponseEntity.ok(response);
     }
 
-
     @PostMapping("/postFeedpage2")  //피드 페이지에 이미지를 업로드하는 기능
     public ResponseEntity<List<String>> uploadImageUrls2(@RequestBody FeedPageData request) {
         try {
