@@ -2,11 +2,8 @@ package com.example.demo2.Controller;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.example.demo2.domian.MyClosetData;
-import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,10 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 @Slf4j
@@ -92,6 +86,7 @@ public class MyClosetController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
     @PostMapping(value = "/uploadTempCloset_outer", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public String uploadImages(@RequestParam("files") List<MultipartFile> files, @RequestParam("userid") String userId) {
         try {
@@ -116,62 +111,70 @@ public class MyClosetController {
     }
 
     @PostMapping(value = "/uploadTempCloset_top", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public String uploadImage2(@RequestParam("file") MultipartFile file, @RequestParam("userid") String userId) {
+    public String uploadImages2(@RequestParam("files") List<MultipartFile> files, @RequestParam("userid") String userId) {
         try {
-            String fileName = file.getOriginalFilename();
-            String key = UUID.randomUUID().toString() + "_" + fileName;
+            for (MultipartFile file : files) {
+                String fileName = file.getOriginalFilename();
+                String key = UUID.randomUUID().toString() + "_" + fileName;
 
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentType(file.getContentType());
-            metadata.setContentLength(file.getSize());
-            metadata.addUserMetadata("userid", userId);
+                ObjectMetadata metadata = new ObjectMetadata();
+                metadata.setContentType(file.getContentType());
+                metadata.setContentLength(file.getSize());
+                metadata.addUserMetadata("userid", userId);
 
-            amazonS3.putObject(bucket5_top, key, file.getInputStream(), metadata);
+                amazonS3.putObject(bucket5_top, key, file.getInputStream(), metadata);
+            }
 
-            // 업로드가 성공적으로 완료되었다는 메시지를 반환합니다.
-            return "Image uploaded successfully!";
+            // All files uploaded successfully
+            return "Images uploaded successfully!";
         } catch (Exception e) {
-            // 업로드 실패 시 예외 처리 로직을 추가합니다.
+            // Upload failed
             return "Image upload failed.";
         }
     }
+
     @PostMapping(value = "/uploadTempCloset_pants", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public String uploadImage3(@RequestParam("file") MultipartFile file, @RequestParam("userid") String userId) {
+    public String uploadImages3(@RequestParam("files") List<MultipartFile> files, @RequestParam("userid") String userId) {
         try {
-            String fileName = file.getOriginalFilename();
-            String key = UUID.randomUUID().toString() + "_" + fileName;
+            for (MultipartFile file : files) {
+                String fileName = file.getOriginalFilename();
+                String key = UUID.randomUUID().toString() + "_" + fileName;
 
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentType(file.getContentType());
-            metadata.setContentLength(file.getSize());
-            metadata.addUserMetadata("userid", userId);
+                ObjectMetadata metadata = new ObjectMetadata();
+                metadata.setContentType(file.getContentType());
+                metadata.setContentLength(file.getSize());
+                metadata.addUserMetadata("userid", userId);
 
-            amazonS3.putObject(bucket5_pants, key, file.getInputStream(), metadata);
+                amazonS3.putObject(bucket5_pants, key, file.getInputStream(), metadata);
+            }
 
-            // 업로드가 성공적으로 완료되었다는 메시지를 반환합니다.
-            return "Image uploaded successfully!";
+            // All files uploaded successfully
+            return "Images uploaded successfully!";
         } catch (Exception e) {
-            // 업로드 실패 시 예외 처리 로직을 추가합니다.
+            // Upload failed
             return "Image upload failed.";
         }
     }
+
     @PostMapping(value = "/uploadTempCloset_shoes", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public String uploadImage4(@RequestParam("file") MultipartFile file, @RequestParam("userid") String userId) {
+    public String uploadImages4(@RequestParam("files") List<MultipartFile> files, @RequestParam("userid") String userId) {
         try {
-            String fileName = file.getOriginalFilename();
-            String key = UUID.randomUUID().toString() + "_" + fileName;
+            for (MultipartFile file : files) {
+                String fileName = file.getOriginalFilename();
+                String key = UUID.randomUUID().toString() + "_" + fileName;
 
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentType(file.getContentType());
-            metadata.setContentLength(file.getSize());
-            metadata.addUserMetadata("userid", userId);
+                ObjectMetadata metadata = new ObjectMetadata();
+                metadata.setContentType(file.getContentType());
+                metadata.setContentLength(file.getSize());
+                metadata.addUserMetadata("userid", userId);
 
-            amazonS3.putObject(bucket5_shoes, key, file.getInputStream(), metadata);
+                amazonS3.putObject(bucket5_shoes, key, file.getInputStream(), metadata);
+            }
 
-            // 업로드가 성공적으로 완료되었다는 메시지를 반환합니다.
-            return "Image uploaded successfully!";
+            // All files uploaded successfully
+            return "Images uploaded successfully!";
         } catch (Exception e) {
-            // 업로드 실패 시 예외 처리 로직을 추가합니다.
+            // Upload failed
             return "Image upload failed.";
         }
     }
