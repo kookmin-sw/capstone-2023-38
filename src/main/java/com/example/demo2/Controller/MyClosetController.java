@@ -93,25 +93,28 @@ public class MyClosetController {
         }
     }
     @PostMapping(value = "/uploadTempCloset_outer", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public String uploadImage(@RequestParam("file") MultipartFile file, @RequestParam("userid") String userId) {
+    public String uploadImages(@RequestParam("files") List<MultipartFile> files, @RequestParam("userid") String userId) {
         try {
-            String fileName = file.getOriginalFilename();
-            String key = UUID.randomUUID().toString() + "_" + fileName;
+            for (MultipartFile file : files) {
+                String fileName = file.getOriginalFilename();
+                String key = UUID.randomUUID().toString() + "_" + fileName;
 
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentType(file.getContentType());
-            metadata.setContentLength(file.getSize());
-            metadata.addUserMetadata("userid", userId);
+                ObjectMetadata metadata = new ObjectMetadata();
+                metadata.setContentType(file.getContentType());
+                metadata.setContentLength(file.getSize());
+                metadata.addUserMetadata("userid", userId);
 
-            amazonS3.putObject(bucket5_outer, key, file.getInputStream(), metadata);
+                amazonS3.putObject(bucket5_outer, key, file.getInputStream(), metadata);
+            }
 
-            // 업로드가 성공적으로 완료되었다는 메시지를 반환합니다.
-            return "Image uploaded successfully!";
+            // All files uploaded successfully
+            return "Images uploaded successfully!";
         } catch (Exception e) {
-            // 업로드 실패 시 예외 처리 로직을 추가합니다.
+            // Upload failed
             return "Image upload failed.";
         }
     }
+
     @PostMapping(value = "/uploadTempCloset_top", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public String uploadImage2(@RequestParam("file") MultipartFile file, @RequestParam("userid") String userId) {
         try {
