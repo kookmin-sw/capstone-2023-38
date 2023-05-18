@@ -4,7 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.example.demo2.domian.RecStartData;
+import com.example.demo2.domain.RecStartData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +32,7 @@ public class RecImgRegController {
         List<S3ObjectSummary> s3ObjectSummaries = amazonS3.listObjects(bucket4).getObjectSummaries();
         Map<String, List<Map<String, Object>>> imageUrlsByCategory = new HashMap<>();
         Map<String, Integer> imageCountByCategory = new HashMap<>();
-        Arrays.asList("top", "pants", "outer", "shoes").forEach(category -> imageCountByCategory.put(category, 1));
+        Arrays.asList("top", "bottom", "outer", "shoes").forEach(category -> imageCountByCategory.put(category, 1));
         for (S3ObjectSummary s3ObjectSummary : s3ObjectSummaries) {
             String fileName = s3ObjectSummary.getKey();
             S3Object s3Object = amazonS3.getObject(bucket4, fileName);
@@ -60,9 +60,10 @@ public class RecImgRegController {
 
     private String getCategoryName(String folderName) {
         if (folderName.contains("top")) return "top";
-        if (folderName.contains("pants")) return "pants";
+        if (folderName.contains("bottom")) return "bottom";
         if (folderName.contains("outer")) return "outer";
         if (folderName.contains("shoes")) return "shoes";
+        if (folderName.contains("accessory")) return "accessory";
         return "etc";
     }
 

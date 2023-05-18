@@ -37,6 +37,8 @@ public class MyClosetController {
     private String bucket5_shoes;
     @Value("${cloud.aws.s3.bucket5}/bottom")
     private String bucket5_bottom;
+    @Value("${cloud.aws.s3.bucket5}/accessory")
+    private String bucket5_accessory;
 
     @GetMapping("/getMycloset2/{id}")
     public ResponseEntity<Map<String, Object>> getImageUrlsById2(@PathVariable String id) throws IOException {
@@ -74,6 +76,7 @@ public class MyClosetController {
         if (folderName.contains("bottom")) return "bottom";
         if (folderName.contains("outer")) return "outer";
         if (folderName.contains("shoes")) return "shoes";
+        if (folderName.contains("accessory")) return "accessory";
         return "etc";
     }
 
@@ -106,5 +109,10 @@ public class MyClosetController {
     @PostMapping(value = "/uploadTempCloset_SHOES", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public String uploadImages4(@RequestParam("files") List<MultipartFile> files, @RequestParam("userid") String userId) {
         return functions.uploadImagesToBucket(bucket5_shoes, files, userId);
+    }
+
+    @PostMapping(value = "/uploadTempCloset_ACCESSORY", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public String uploadImages5(@RequestParam("files") List<MultipartFile> files, @RequestParam("userid") String userId) {
+        return functions.uploadImagesToBucket(bucket5_accessory, files, userId);
     }
 }

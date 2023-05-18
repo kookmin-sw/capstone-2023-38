@@ -39,6 +39,8 @@ public class Functions {
     private String bucket4_shoes;
     @Value("${cloud.aws.s3.bucket4}/bottom")
     private String bucket4_bottom;
+    @Value("${cloud.aws.s3.bucket4}/accessory")
+    private String bucket4_accessory;
 
     public List<String> uploadUrlsGeneric(List<String> imageUrls, String userId, BiFunction<File, String, String> uploadMethod) throws IOException {
         List<String> uploadedImageUrls = new ArrayList<>();
@@ -218,6 +220,7 @@ public class Functions {
         amazonS3.deleteObject(bucket4_top, fileName);
         amazonS3.deleteObject(bucket4_bottom, fileName);
         amazonS3.deleteObject(bucket4_shoes, fileName);
+        amazonS3.deleteObject(bucket4_accessory, fileName);
     }
     public void deleteMyfeed(String imageUrl) {  //피드에서 내가 올린 이미지 삭제, 즉 Feed버킷에서 삭제
         String fileName = getFileNameFromUrl(imageUrl);

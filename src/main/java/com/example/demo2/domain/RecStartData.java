@@ -1,6 +1,5 @@
-package com.example.demo2.domian;
+package com.example.demo2.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
