@@ -35,15 +35,15 @@ public class MyClosetController {
     private String bucket5_top;
     @Value("${cloud.aws.s3.bucket5}/shoes")
     private String bucket5_shoes;
-    @Value("${cloud.aws.s3.bucket5}/pants")
-    private String bucket5_pants;
+    @Value("${cloud.aws.s3.bucket5}/bottom")
+    private String bucket5_bottom;
 
     @GetMapping("/getMycloset2/{id}")
     public ResponseEntity<Map<String, Object>> getImageUrlsById2(@PathVariable String id) throws IOException {
         List<S3ObjectSummary> s3ObjectSummaries = amazonS3.listObjects(bucket4).getObjectSummaries();
         Map<String, List<Map<String, Object>>> imageUrlsByCategory = new HashMap<>();
         Map<String, Integer> imageCountByCategory = new HashMap<>();
-        Arrays.asList("top", "pants", "outer", "shoes").forEach(category -> imageCountByCategory.put(category, 1));
+        Arrays.asList("top", "bottom", "outer", "shoes").forEach(category -> imageCountByCategory.put(category, 1));
         for (S3ObjectSummary s3ObjectSummary : s3ObjectSummaries) {
             String fileName = s3ObjectSummary.getKey();
             S3Object s3Object = amazonS3.getObject(bucket4, fileName);
@@ -71,11 +71,12 @@ public class MyClosetController {
 
     private String getCategoryName(String folderName) {
         if (folderName.contains("top")) return "top";
-        if (folderName.contains("pants")) return "pants";
+        if (folderName.contains("bottom")) return "bottom";
         if (folderName.contains("outer")) return "outer";
         if (folderName.contains("shoes")) return "shoes";
         return "etc";
     }
+
     @DeleteMapping("/deleteMyCloset")  //내 옷장에서 이미지를 삭제하는 기능
     public ResponseEntity<Void> deleteImage(@RequestParam("imageUrl") String imageUrl) {
         try {
@@ -87,95 +88,23 @@ public class MyClosetController {
         }
     }
 
-    @PostMapping(value = "/uploadTempCloset_outer", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @PostMapping(value = "/uploadTempCloset_OUTER", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public String uploadImages(@RequestParam("files") List<MultipartFile> files, @RequestParam("userid") String userId) {
-        try {
-            for (MultipartFile file : files) {
-                String fileName = file.getOriginalFilename();
-                String key = UUID.randomUUID().toString() + "_" + fileName;
-
-                ObjectMetadata metadata = new ObjectMetadata();
-                metadata.setContentType(file.getContentType());
-                metadata.setContentLength(file.getSize());
-                metadata.addUserMetadata("userid", userId);
-
-                amazonS3.putObject(bucket5_outer, key, file.getInputStream(), metadata);
-            }
-
-            // All files uploaded successfully
-            return "Images uploaded successfully!";
-        } catch (Exception e) {
-            // Upload failed
-            return "Image upload failed.";
-        }
+        return functions.uploadImagesToBucket(bucket5_outer, files, userId);
     }
 
-    @PostMapping(value = "/uploadTempCloset_top", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @PostMapping(value = "/uploadTempCloset_TOP", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public String uploadImages2(@RequestParam("files") List<MultipartFile> files, @RequestParam("userid") String userId) {
-        try {
-            for (MultipartFile file : files) {
-                String fileName = file.getOriginalFilename();
-                String key = UUID.randomUUID().toString() + "_" + fileName;
-
-                ObjectMetadata metadata = new ObjectMetadata();
-                metadata.setContentType(file.getContentType());
-                metadata.setContentLength(file.getSize());
-                metadata.addUserMetadata("userid", userId);
-
-                amazonS3.putObject(bucket5_top, key, file.getInputStream(), metadata);
-            }
-
-            // All files uploaded successfully
-            return "Images uploaded successfully!";
-        } catch (Exception e) {
-            // Upload failed
-            return "Image upload failed.";
-        }
+        return functions.uploadImagesToBucket(bucket5_top, files, userId);
     }
 
-    @PostMapping(value = "/uploadTempCloset_pants", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @PostMapping(value = "/uploadTempCloset_BOTTOM", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public String uploadImages3(@RequestParam("files") List<MultipartFile> files, @RequestParam("userid") String userId) {
-        try {
-            for (MultipartFile file : files) {
-                String fileName = file.getOriginalFilename();
-                String key = UUID.randomUUID().toString() + "_" + fileName;
-
-                ObjectMetadata metadata = new ObjectMetadata();
-                metadata.setContentType(file.getContentType());
-                metadata.setContentLength(file.getSize());
-                metadata.addUserMetadata("userid", userId);
-
-                amazonS3.putObject(bucket5_pants, key, file.getInputStream(), metadata);
-            }
-
-            // All files uploaded successfully
-            return "Images uploaded successfully!";
-        } catch (Exception e) {
-            // Upload failed
-            return "Image upload failed.";
-        }
+        return functions.uploadImagesToBucket(bucket5_bottom, files, userId);
     }
 
-    @PostMapping(value = "/uploadTempCloset_shoes", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @PostMapping(value = "/uploadTempCloset_SHOES", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public String uploadImages4(@RequestParam("files") List<MultipartFile> files, @RequestParam("userid") String userId) {
-        try {
-            for (MultipartFile file : files) {
-                String fileName = file.getOriginalFilename();
-                String key = UUID.randomUUID().toString() + "_" + fileName;
-
-                ObjectMetadata metadata = new ObjectMetadata();
-                metadata.setContentType(file.getContentType());
-                metadata.setContentLength(file.getSize());
-                metadata.addUserMetadata("userid", userId);
-
-                amazonS3.putObject(bucket5_shoes, key, file.getInputStream(), metadata);
-            }
-
-            // All files uploaded successfully
-            return "Images uploaded successfully!";
-        } catch (Exception e) {
-            // Upload failed
-            return "Image upload failed.";
-        }
+        return functions.uploadImagesToBucket(bucket5_shoes, files, userId);
     }
 }

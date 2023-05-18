@@ -69,7 +69,7 @@ public class RecImgRegController {
     @PostMapping("/uploadRecStart")  //추천 받을 이미지 임시 저장
     public ResponseEntity<List<String>> uploadImageUrls(@RequestBody RecStartData request) {
         try {
-            List<String> uploadedImageUrls = functions.uploadUrlsRecStart(request.getImageUrls(), request.getUserId());
+            List<String> uploadedImageUrls = functions.uploadUrlsRecStart(request.getImageUrls(), request.getUserId(), request.getSeason());
             return ResponseEntity.ok(uploadedImageUrls);
         } catch (IOException e) {
             e.printStackTrace();

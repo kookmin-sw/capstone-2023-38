@@ -62,10 +62,9 @@ public class MyLikeImgController {
         response.add(idImageMap);
         return ResponseEntity.ok(response);
     }
-    @DeleteMapping("/deliteMylike/{id}") //내거 좋아요 누른 목록에서 이미지를 삭제하는 기능
+    @DeleteMapping("/deliteMylike/{id}") //내가 좋아요 누른 목록에서 이미지를 삭제하는 기능
     public ResponseEntity<Void> deleteImage(@RequestParam("imageUrl") String imageUrl, @PathVariable String id) {
         try {
-// Get object metadata for the S3 object with the given image URL
             String bucket = bucket2;
             String key = getImageKeyFromUrl(imageUrl);
             ObjectMetadata metadata = amazonS3.getObjectMetadata(bucket, key);
@@ -76,7 +75,6 @@ public class MyLikeImgController {
                 List<String> likedByList = new ArrayList<>(Arrays.asList(likedBy.split(",")));
                 likedByList.remove(id);
                 String updatedLikedBy = String.join(",", likedByList);
-
 
                 ObjectMetadata newMetadata = new ObjectMetadata();
                 for (Map.Entry<String, String> entry : metadata.getUserMetadata().entrySet()) {
