@@ -40,48 +40,50 @@ public class MyLikeImgController {
             S3Object s3Object = amazonS3.getObject(bucket2, fileName);
             ObjectMetadata objectMetadata = s3Object.getObjectMetadata();
 
-            // Check if "liked-by" metadata contains the given id
-            String likedBy = objectMetadata.getUserMetaDataOf("liked-by");
-            if (Arrays.asList(likedBy.split(",")).contains(id)) {
+            String likedKey = id + "-liked";
+            boolean liked = objectMetadata.getUserMetadata().containsKey(likedKey) && "true".equals(objectMetadata.getUserMetaDataOf(likedKey));
+            if (liked) {
                 Map<String, Object> imageMap = new LinkedHashMap<>();
                 imageMap.put("number", count);
                 imageMap.put("imgsrc", amazonS3.getUrl(bucket2, fileName).toString());
-                imageMap.put("user-id", objectMetadata.getUserMetaDataOf("user-id"));
+                imageMap.put("imageUserId", objectMetadata.getUserMetaDataOf("user-id"));
                 imageMap.put("upload-time", objectMetadata.getUserMetaDataOf("upload-time"));
-                imageMap.put("wcount", objectMetadata.getUserMetaDataOf("wcount"));
                 imageMap.put("acount", objectMetadata.getUserMetaDataOf("acount"));
 
                 imageUrls.add(imageMap);
                 count++;
             }
         }
-        Map<String, Object> idImageMap = new LinkedHashMap<>(); // LinkedHashMap 사용
+        Map<String, Object> idImageMap = new LinkedHashMap<>();
         idImageMap.put("id", id);
         idImageMap.put("images", imageUrls);
 
         response.add(idImageMap);
         return ResponseEntity.ok(response);
     }
-    @DeleteMapping("/deliteMylike/{id}") //내가 좋아요 누른 목록에서 이미지를 삭제하는 기능
+
+    @DeleteMapping("/deliteMylike/{id}")
     public ResponseEntity<Void> deleteImage(@RequestParam("imageUrl") String imageUrl, @PathVariable String id) {
         try {
             String bucket = bucket2;
             String key = getImageKeyFromUrl(imageUrl);
             ObjectMetadata metadata = amazonS3.getObjectMetadata(bucket, key);
 
-            String likedBy = metadata.getUserMetaDataOf("liked-by");
-            if (likedBy != null && likedBy.contains(id)) {
-
-                List<String> likedByList = new ArrayList<>(Arrays.asList(likedBy.split(",")));
-                likedByList.remove(id);
-                String updatedLikedBy = String.join(",", likedByList);
-
+            String likedKey = id + "-liked";
+            boolean liked = metadata.getUserMetadata().containsKey(likedKey) && "true".equals(metadata.getUserMetaDataOf(likedKey));
+            if (liked) {
                 ObjectMetadata newMetadata = new ObjectMetadata();
                 for (Map.Entry<String, String> entry : metadata.getUserMetadata().entrySet()) {
-                    newMetadata.addUserMetadata(entry.getKey(), entry.getValue());
+                    if (!entry.getKey().equals(likedKey)) {
+                        newMetadata.addUserMetadata(entry.getKey(), entry.getValue());
+                    }
                 }
 
-                newMetadata.addUserMetadata("liked-by", updatedLikedBy);
+                String acountStr = metadata.getUserMetaDataOf("acount");
+                int acount = acountStr != null ? Integer.parseInt(acountStr) : 0;
+                acount--; // acount 값을 1 감소시킴
+
+                newMetadata.addUserMetadata("acount", String.valueOf(acount)); // 감소된 acount 값을 새로운 메타데이터에 추가
 
                 CopyObjectRequest copyObjectRequest = new CopyObjectRequest(bucket, key, bucket, key)
                         .withNewObjectMetadata(newMetadata)
@@ -95,6 +97,8 @@ public class MyLikeImgController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+
 
     private String getImageKeyFromUrl(String imageUrl) throws MalformedURLException {
         URL url = new URL(imageUrl);

@@ -74,7 +74,7 @@ public class WishListController {
     @PostMapping("/postFeedpage")  //피드 페이지에 이미지를 업로드하는 기능
     public ResponseEntity<List<String>> uploadImageUrls2(@RequestBody FeedPageData request) {
         try {
-            List<String> uploadedImageUrls = functions.uploadUrlsFeed(request.getImageUrls(), request.getUserId(), request.getWcount(), request.getAcount());
+            List<String> uploadedImageUrls = functions.uploadUrlsFeed(request.getImageUrls(), request.getUserId(), request.getAcount());
             return ResponseEntity.ok(uploadedImageUrls);
         } catch (IOException e) {
             e.printStackTrace();

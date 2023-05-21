@@ -64,21 +64,19 @@ public class Functions {
     }
 
     //--------------------------------피드 페이지 등록 기능--------------------------------------------------
-    public List<String> uploadUrlsFeed(List<String> imageUrls, String userId, int wcount, int acount) throws IOException {
-        return uploadUrlsGeneric(imageUrls, userId, (file, uid) -> uploadFeed(file, uid, wcount, acount));
+    public List<String> uploadUrlsFeed(List<String> imageUrls, String userId, int acount) throws IOException {
+        return uploadUrlsGeneric(imageUrls, userId, (file, uid) -> uploadFeed(file, uid, acount));
     }
 
-    public String uploadFeed(File uploadFile, String userId, int wcount, int acount) {
-        return uploadGeneric(uploadFile, (file, name) -> putS3Feed(file, name, userId, wcount, acount), userId);
+    public String uploadFeed(File uploadFile, String userId, int acount) {
+        return uploadGeneric(uploadFile, (file, name) -> putS3Feed(file, name, userId, acount), userId);
     }
-    private String putS3Feed(File uploadFile, String fileName, String userId, int wcount, int acount) {
+    private String putS3Feed(File uploadFile, String fileName, String userId, int acount) {
         ObjectMetadata objectMetadata = new ObjectMetadata();
 
         objectMetadata.addUserMetadata("user-id", userId);
-        objectMetadata.addUserMetadata("wcount", Integer.toString(wcount));
         objectMetadata.addUserMetadata("acount", Integer.toString(acount));
         objectMetadata.addUserMetadata("upload-time", new Date().toString());
-        objectMetadata.addUserMetadata("liked-by", "");  // "liked-by" 이름의 빈 문자열을 추가
 
         amazonS3.putObject(
                 new PutObjectRequest(bucket2, fileName, uploadFile)
@@ -159,44 +157,61 @@ public class Functions {
         return Optional.empty();
     }
 
-    public int getWcount(String imageUrl) {
-        S3Object object = amazonS3.getObject(bucket2, getFileNameFromUrl(imageUrl));
-        String wcountString = object.getObjectMetadata().getUserMetaDataOf("wcount");
-        return Integer.parseInt(wcountString);
-    }
-
     public int getAcount(String imageUrl) {
         S3Object object = amazonS3.getObject(bucket2, getFileNameFromUrl(imageUrl));
         String acountString = object.getObjectMetadata().getUserMetaDataOf("acount");
         return Integer.parseInt(acountString);
     }
 
-    public void updateWcountAndAcount(String imageUrl, String userId) {
+    public void updateAcount(String imageUrl, String userId) {
         String fileName = getFileNameFromUrl(imageUrl);
         S3Object object = amazonS3.getObject(bucket2, fileName);
         ObjectMetadata metadata = object.getObjectMetadata();
-        // 중복된 아이디가 있는지 체크
-        String likedByString = metadata.getUserMetaDataOf("liked-by");
-        if (likedByString.contains(userId)) { // 이미 좋아요를 누른 경우
-            return;
+
+        int acount = Integer.parseInt(metadata.getUserMetaDataOf("acount"));
+
+        // 중복 처리를 위한 아이디 확인
+        String likedKey = userId + "-liked";
+        if (!metadata.getUserMetadata().containsKey(likedKey)) {
+            // acount 값 1 증가
+            acount++;
+
+            // acount 업데이트
+            metadata.addUserMetadata("acount", Integer.toString(acount));
+
+            // Flag 값 추가
+            metadata.addUserMetadata(likedKey, "true");
+
+            CopyObjectRequest copyObjectMetadataRequest = new CopyObjectRequest(bucket2, fileName, bucket2, fileName)
+                    .withNewObjectMetadata(metadata);
+
+            amazonS3.copyObject(copyObjectMetadataRequest);
+        } else {
+            // 중복 처리된 아이디일 경우
+            // Flag 값 삭제
+            Map<String, String> updatedMetadata = new HashMap<>();
+            for (Map.Entry<String, String> entry : metadata.getUserMetadata().entrySet()) {
+                if (!entry.getKey().equals(likedKey)) {
+                    updatedMetadata.put(entry.getKey(), entry.getValue());
+                }
+            }
+
+            // acount 값 1 감소
+            acount--;
+
+            // acount 업데이트
+            updatedMetadata.put("acount", Integer.toString(acount));
+
+            ObjectMetadata newMetadata = new ObjectMetadata();
+            newMetadata.setUserMetadata(updatedMetadata);
+
+            CopyObjectRequest copyObjectMetadataRequest = new CopyObjectRequest(bucket2, fileName, bucket2, fileName)
+                    .withNewObjectMetadata(newMetadata);
+
+            amazonS3.copyObject(copyObjectMetadataRequest);
         }
-
-        int wcount = Integer.parseInt(metadata.getUserMetaDataOf("wcount")) + 1;
-        int acount = Integer.parseInt(metadata.getUserMetaDataOf("acount")) + 1;
-
-        // 좋아요를 누른 사용자 아이디 추가
-        String newLikedByString = likedByString + userId + ",";
-        metadata.addUserMetadata("liked-by", newLikedByString);
-
-        // wcount와 acount 업데이트
-        metadata.addUserMetadata("wcount", Integer.toString(wcount));
-        metadata.addUserMetadata("acount", Integer.toString(acount));
-
-        CopyObjectRequest copyObjectMetadataRequest = new CopyObjectRequest(bucket2, fileName, bucket2, fileName)
-                .withNewObjectMetadata(metadata);
-
-        amazonS3.copyObject(copyObjectMetadataRequest);
     }
+
 
     private String getFileNameFromUrl(String imageUrl) {
         int slashIndex = imageUrl.lastIndexOf('/');

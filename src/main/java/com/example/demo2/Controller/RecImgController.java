@@ -21,7 +21,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api")
 @EnableScheduling
-public class RecImgRegController {
+public class RecImgController {
     private final AmazonS3 amazonS3;
     private final Functions functions;
 
@@ -32,7 +32,7 @@ public class RecImgRegController {
         List<S3ObjectSummary> s3ObjectSummaries = amazonS3.listObjects(bucket4).getObjectSummaries();
         Map<String, List<Map<String, Object>>> imageUrlsByCategory = new HashMap<>();
         Map<String, Integer> imageCountByCategory = new HashMap<>();
-        Arrays.asList("top", "bottom", "outer", "shoes").forEach(category -> imageCountByCategory.put(category, 1));
+        Arrays.asList("top", "bottom", "outer", "shoes", "accessory").forEach(category -> imageCountByCategory.put(category, 1));
         for (S3ObjectSummary s3ObjectSummary : s3ObjectSummaries) {
             String fileName = s3ObjectSummary.getKey();
             S3Object s3Object = amazonS3.getObject(bucket4, fileName);
@@ -77,4 +77,6 @@ public class RecImgRegController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+
 }

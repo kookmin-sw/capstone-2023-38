@@ -35,8 +35,8 @@ public class FeedPageController {
     @Value("${cloud.aws.s3.bucket3}")
     private String bucket3;
     @GetMapping("/getFeedpage/uploadTime")
-    public ResponseEntity<List<Map<String, Object>>> getImageUrlsSortedByUploadTime() throws IOException {
-        List<Map<String, Object>> response = new ArrayList<>();
+    public ResponseEntity<Map<String, Object>> getImageUrlsSortedByUploadTime(@RequestParam("userId") String userId) throws IOException {
+        List<Map<String, Object>> imageList = new ArrayList<>();
         List<S3ObjectSummary> s3ObjectSummaries = amazonS3.listObjects(bucket2).getObjectSummaries();
         s3ObjectSummaries.sort(Comparator.nullsLast(Comparator.comparing(o -> {
             String fileName = o.getKey();
@@ -51,60 +51,38 @@ public class FeedPageController {
             return null;
         })));
 
+        int count = 1;
         for (S3ObjectSummary s3ObjectSummary : s3ObjectSummaries) {
             String fileName = s3ObjectSummary.getKey();
             S3Object s3Object = amazonS3.getObject(bucket2, fileName);
             ObjectMetadata objectMetadata = s3Object.getObjectMetadata();
 
-            String userId = objectMetadata.getUserMetaDataOf("user-id");
+            String imageUserId = objectMetadata.getUserMetaDataOf("user-id");
+            String likedKey = userId + "-liked";
+            boolean liked = objectMetadata.getUserMetadata().containsKey(likedKey) && "true".equals(objectMetadata.getUserMetaDataOf(likedKey));
 
-            Map<String, Object> imageMetadata = new HashMap<>();
+            Map<String, Object> imageMetadata = new LinkedHashMap<>();
+            imageMetadata.put("number", count);
             imageMetadata.put("imageUrl", amazonS3.getUrl(bucket2, fileName).toString());
-            imageMetadata.put("userId", userId);
-            imageMetadata.put("wcount", objectMetadata.getUserMetaDataOf("wcount"));
+            imageMetadata.put("imageUserId", imageUserId);
             imageMetadata.put("acount", objectMetadata.getUserMetaDataOf("acount"));
             imageMetadata.put("uploadTime", objectMetadata.getUserMetaDataOf("upload-time"));
+            imageMetadata.put("liked", liked);
 
-            response.add(imageMetadata);
+            imageList.add(imageMetadata);
+            count++;
         }
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("userId", userId);
+        response.put("images", imageList);
 
         return ResponseEntity.ok(response);
     }
-    @GetMapping("/getFeedpage/wcount")
-    public ResponseEntity<List<Map<String, Object>>> getImageUrlsSortedByWcount() throws IOException {
-        List<Map<String, Object>> response = new ArrayList<>();
 
-        List<S3ObjectSummary> s3ObjectSummaries = amazonS3.listObjects(bucket2).getObjectSummaries();
-        s3ObjectSummaries.sort(Comparator.comparingInt((S3ObjectSummary o) -> {
-            String fileName = o.getKey();
-            S3Object s3Object = amazonS3.getObject(bucket2, fileName);
-            ObjectMetadata objectMetadata = s3Object.getObjectMetadata();
-            String acountStr = objectMetadata.getUserMetaDataOf("acount");
-            return acountStr != null ? Integer.parseInt(acountStr) : 0;
-        }).reversed());
-
-        for (S3ObjectSummary s3ObjectSummary : s3ObjectSummaries) {
-            String fileName = s3ObjectSummary.getKey();
-            S3Object s3Object = amazonS3.getObject(bucket2, fileName);
-            ObjectMetadata objectMetadata = s3Object.getObjectMetadata();
-
-            String userId = objectMetadata.getUserMetaDataOf("user-id");
-
-            Map<String, Object> imageMetadata = new HashMap<>();
-            imageMetadata.put("imageUrl", amazonS3.getUrl(bucket2, fileName).toString());
-            imageMetadata.put("userId", userId);
-            imageMetadata.put("wcount", objectMetadata.getUserMetaDataOf("wcount"));
-            imageMetadata.put("acount", objectMetadata.getUserMetaDataOf("acount"));
-            imageMetadata.put("uploadTime", objectMetadata.getUserMetaDataOf("upload-time"));
-
-            response.add(imageMetadata);
-        }
-
-        return ResponseEntity.ok(response);
-    }
     @GetMapping("/getFeedpage/acount")
-    public ResponseEntity<List<Map<String, Object>>> getImageUrlsSortedByAcount() throws IOException {
-        List<Map<String, Object>> response = new ArrayList<>();
+    public ResponseEntity<Map<String, Object>> getImageUrlsSortedByAcount(@RequestParam("userId") String userId) throws IOException {
+        List<Map<String, Object>> imageList = new ArrayList<>();
 
         List<S3ObjectSummary> s3ObjectSummaries = amazonS3.listObjects(bucket2).getObjectSummaries();
         s3ObjectSummaries.sort(Comparator.comparingInt((S3ObjectSummary o) -> {
@@ -115,64 +93,48 @@ public class FeedPageController {
             return acountStr != null ? Integer.parseInt(acountStr) : 0;
         }).reversed());
 
-
+        int count = 1;
         for (S3ObjectSummary s3ObjectSummary : s3ObjectSummaries) {
             String fileName = s3ObjectSummary.getKey();
             S3Object s3Object = amazonS3.getObject(bucket2, fileName);
             ObjectMetadata objectMetadata = s3Object.getObjectMetadata();
 
-            String userId = objectMetadata.getUserMetaDataOf("user-id");
+            String imageUserId = objectMetadata.getUserMetaDataOf("user-id");
+            String likedKey = userId + "-liked";
+            boolean liked = objectMetadata.getUserMetadata().containsKey(likedKey) && "true".equals(objectMetadata.getUserMetaDataOf(likedKey));
 
-            Map<String, Object> imageMetadata = new HashMap<>();
+            Map<String, Object> imageMetadata = new LinkedHashMap<>();
+            imageMetadata.put("number", count);
             imageMetadata.put("imageUrl", amazonS3.getUrl(bucket2, fileName).toString());
-            imageMetadata.put("userId", userId);
-            imageMetadata.put("wcount", objectMetadata.getUserMetaDataOf("wcount"));
+            imageMetadata.put("imageUserId", imageUserId);
             imageMetadata.put("acount", objectMetadata.getUserMetaDataOf("acount"));
             imageMetadata.put("uploadTime", objectMetadata.getUserMetaDataOf("upload-time"));
+            imageMetadata.put("liked", liked);
 
-            response.add(imageMetadata);
+            imageList.add(imageMetadata);
+            count++;
         }
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("userId", userId);
+        response.put("images", imageList);
 
         return ResponseEntity.ok(response);
     }
+
+
+
     @PutMapping("/increaseCount")  //좋아요 수를 올려주는 기능
     public ResponseEntity<Void> incrementCounts(@RequestParam("imageUrl") String imageUrl, @RequestParam("userId") String userId) {
         try {
-            functions.updateWcountAndAcount(imageUrl, userId);
+            functions.updateAcount(imageUrl, userId);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    @Scheduled(cron = "0 0 0 ? * MON", zone = "Asia/Seoul")  //주간 좋아요 초기화 기능
-    public void weeklyReset() {
-        try {
-            List<S3ObjectSummary> s3ObjectSummaries = amazonS3.listObjects(bucket2).getObjectSummaries();
-            for (S3ObjectSummary s3ObjectSummary : s3ObjectSummaries) {
-                String fileName = s3ObjectSummary.getKey();
-                S3Object s3Object = amazonS3.getObject(bucket2, fileName);
-                ObjectMetadata objectMetadata = s3Object.getObjectMetadata();
 
-                String wcountStr = objectMetadata.getUserMetaDataOf("wcount");
-                if (wcountStr != null) {
-                    int wcount = Integer.parseInt(wcountStr);
-                    if (wcount > 0) {
-                        // Update metadata with new wcount
-                        ObjectMetadata newMetadata = new ObjectMetadata();
-                        newMetadata.setUserMetadata(objectMetadata.getUserMetadata());
-                        newMetadata.addUserMetadata("wcount", "0"); // 기존 메타데이터에 wcount 값을 추가하도록 수정
-
-                        CopyObjectRequest copyObjectRequest = new CopyObjectRequest(bucket2, fileName, bucket2, fileName)
-                                .withNewObjectMetadata(newMetadata);
-                        amazonS3.copyObject(copyObjectRequest);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
     @GetMapping("/getWishlist2/{id}")
     public ResponseEntity<List<Map<String, Object>>> getImageUrlsById(@PathVariable String id) throws IOException {
         List<Map<String, Object>> response = new ArrayList<>();
@@ -210,7 +172,7 @@ public class FeedPageController {
     @PostMapping("/postFeedpage2")  //피드 페이지에 이미지를 업로드하는 기능
     public ResponseEntity<List<String>> uploadImageUrls2(@RequestBody FeedPageData request) {
         try {
-            List<String> uploadedImageUrls = functions.uploadUrlsFeed(request.getImageUrls(), request.getUserId(), request.getWcount(), request.getAcount());
+            List<String> uploadedImageUrls = functions.uploadUrlsFeed(request.getImageUrls(), request.getUserId(), request.getAcount());
             return ResponseEntity.ok(uploadedImageUrls);
         } catch (IOException e) {
             e.printStackTrace();

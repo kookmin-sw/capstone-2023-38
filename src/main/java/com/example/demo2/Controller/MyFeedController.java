@@ -44,9 +44,11 @@ public class MyFeedController {
 
             if (userId.equals(id)) {
                 String imageLink = amazonS3.getUrl(bucket2, fileName).toString();
-                Map<String, Object> imageMap = new HashMap<>();
+                Map<String, Object> imageMap = new LinkedHashMap<>();
                 imageMap.put("number", count);
                 imageMap.put("imgsrc", imageLink);
+                imageMap.put("upload-time", objectMetadata.getUserMetaDataOf("upload-time"));
+                imageMap.put("acount", objectMetadata.getUserMetaDataOf("acount"));
                 imageUrls.add(imageMap);
                 count++;
             }
