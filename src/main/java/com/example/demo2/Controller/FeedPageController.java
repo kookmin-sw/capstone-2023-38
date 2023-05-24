@@ -6,6 +6,7 @@ import com.example.demo2.User;
 import com.example.demo2.Wishlist;
 
 import com.example.demo2.repository.FeedRepository;
+import com.example.demo2.repository.LikeRepository;
 import com.example.demo2.repository.UserRepository;
 import com.example.demo2.repository.WishlistRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,20 +41,24 @@ public class FeedPageController {
     @Autowired
     private final WishlistRepository wishlistRepository;
 
+    @Autowired
+    private final LikeRepository likeRepository;
+
     @Value("${cloud.aws.s3.bucket2}")
     private String bucket2;
 
     @Value("${cloud.aws.s3.bucket3}")
     private String bucket3;
     @GetMapping("/getFeedpage/uploadTime")
-    @Operation(summary = "업로드 시간을 기준으로 피드 페이지를 보여주는 기능")
-    public ResponseEntity<Map<String, Object>> getFeedPageSortedByUploadTime(@RequestParam("userId") String userId) throws IOException {
+    @Operation(summary = "업로드 시간을 기준으로 피드 페이지를 보여주는 기능 - 완료")
+    public ResponseEntity<Map<String, Object>> getFeedPageSortedByUploadTime(@RequestParam("userId") String userId) {
         List<Map<String, Object>> imageList = new ArrayList<>();
         List<Feed> feedList = feedRepository.findAllByOrderByUploadTimeAsc();
+        User user = userRepository.findByUserId(userId);
 
         int count = 1;
         for (Feed feed : feedList) {
-            User user = feed.getUser();
+            boolean click = likeRepository.existsByUserAndFeed(user, feed);
 
             Map<String, Object> imageMetadata = new LinkedHashMap<>();
             imageMetadata.put("number", count);
@@ -61,6 +66,7 @@ public class FeedPageController {
             imageMetadata.put("imageUserId", user.getUserId());
             imageMetadata.put("uploadTime", feed.getUploadTime());
             imageMetadata.put("like", feed.getLikeCount());
+            imageMetadata.put("click", click);
 
             imageList.add(imageMetadata);
             count++;
@@ -73,16 +79,17 @@ public class FeedPageController {
         return ResponseEntity.ok(response);
     }
 
+
     @GetMapping("/getFeedpage/acount")
-    @Operation(summary = "좋아요 수를 기준으로 피드 페이지를 보여주는 기능")
+    @Operation(summary = "좋아요 수를 기준으로 피드 페이지를 보여주는 기능 - 완료")
     public ResponseEntity<Map<String, Object>> getFeedPageSortedByLikeCount(@RequestParam("userId") String userId) {
         List<Map<String, Object>> imageList = new ArrayList<>();
-
         List<Feed> feedList = feedRepository.findAllByOrderByLikeCountDesc();
+        User user = userRepository.findByUserId(userId);
 
         int count = 1;
         for (Feed feed : feedList) {
-            User user = feed.getUser();
+            boolean click = likeRepository.existsByUserAndFeed(user, feed);
 
             Map<String, Object> imageMetadata = new LinkedHashMap<>();
             imageMetadata.put("number", count);
@@ -90,6 +97,7 @@ public class FeedPageController {
             imageMetadata.put("imageUserId", user.getUserId());
             imageMetadata.put("uploadTime", feed.getUploadTime());
             imageMetadata.put("like", feed.getLikeCount());
+            imageMetadata.put("click", click);
 
             imageList.add(imageMetadata);
             count++;

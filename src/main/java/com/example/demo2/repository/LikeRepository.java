@@ -13,5 +13,7 @@ public interface LikeRepository extends JpaRepository<Like, Integer> {
     Like findByUserAndFeed(User user, Feed feed);
 
     List<Like> findByUser(User user);
+
+    boolean existsByUserAndFeed(User user, Feed feed);
 }
 

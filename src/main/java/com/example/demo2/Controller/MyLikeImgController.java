@@ -41,6 +41,9 @@ public class MyLikeImgController {
     @Autowired
     private final UserRepository userRepository;
 
+    @Autowired
+    private final FeedRepository feedRepository;
+
     @GetMapping("/getMylike/{id}")
     @Operation(summary = "내가 좋아요 누른 게시물을 보여주는 기능 - 완료")
     public ResponseEntity<List<Map<String, Object>>> getImageUrlsById(@PathVariable String id) {
@@ -74,47 +77,25 @@ public class MyLikeImgController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/deleteLike/{id}")
+    @Operation(summary = "좋아요 누른 목록에서 삭제 - 완료")
+    public ResponseEntity<Void> deleteLikeRecord(@PathVariable String id, @RequestParam("imageUrl") String imageUrl) {
+        User user = userRepository.findByUserId(id);
+        Feed feed = feedRepository.findByUrl(imageUrl);
 
-    @DeleteMapping("/deliteMylike/{id}")
-    @Operation(summary = "좋아요 누른 게시물의 좋아요 취소 및 내가 좋아요 누른 목록 페이지에서 삭제하는 기능")
-    public ResponseEntity<Void> deleteImage(@RequestParam("imageUrl") String imageUrl, @PathVariable String id) {
-        try {
-            String bucket = bucket2;
-            String key = getImageKeyFromUrl(imageUrl);
-            ObjectMetadata metadata = amazonS3.getObjectMetadata(bucket, key);
+        if (user != null && feed != null) {
+            Like like = likeRepository.findByUserAndFeed(user, feed);
 
-            String likedKey = id + "-liked";
-            boolean liked = metadata.getUserMetadata().containsKey(likedKey) && "true".equals(metadata.getUserMetaDataOf(likedKey));
-            if (liked) {
-                ObjectMetadata newMetadata = new ObjectMetadata();
-                for (Map.Entry<String, String> entry : metadata.getUserMetadata().entrySet()) {
-                    if (!entry.getKey().equals(likedKey)) {
-                        newMetadata.addUserMetadata(entry.getKey(), entry.getValue());
-                    }
-                }
-
-                String acountStr = metadata.getUserMetaDataOf("acount");
-                int acount = acountStr != null ? Integer.parseInt(acountStr) : 0;
-                acount--; // acount 값을 1 감소시킴
-
-                newMetadata.addUserMetadata("acount", String.valueOf(acount)); // 감소된 acount 값을 새로운 메타데이터에 추가
-
-                CopyObjectRequest copyObjectRequest = new CopyObjectRequest(bucket, key, bucket, key)
-                        .withNewObjectMetadata(newMetadata)
-                        .withCannedAccessControlList(CannedAccessControlList.PublicRead);
-                amazonS3.copyObject(copyObjectRequest);
+            if (like != null) {
+                likeRepository.delete(like);
+                int likeCount = feed.getLikeCount();
+                likeCount--;
+                feed.setLikeCount(likeCount);
+                feedRepository.save(feed);
+                return ResponseEntity.ok().build();
             }
-
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    }
 
-    private String getImageKeyFromUrl(String imageUrl) throws MalformedURLException {
-        URL url = new URL(imageUrl);
-        String path = url.getPath();
-        return path.substring(1);
+        return ResponseEntity.notFound().build();
     }
 }
