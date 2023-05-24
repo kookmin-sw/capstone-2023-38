@@ -1,4 +1,4 @@
-package login.Controller;
+package acho.Controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -35,7 +35,7 @@ public class BaseController {
     private final ClientRegistrationRepository clientRegistrationRepository;
 
     @SuppressWarnings("unchecked")
-    @GetMapping("/login")
+    @GetMapping("/acho")
     public String getLoginPage(Model model) throws Exception {
         Iterable<ClientRegistration> clientRegistrations = null;
         ResolvableType type = ResolvableType.forInstance(clientRegistrationRepository)
@@ -50,10 +50,10 @@ public class BaseController {
                         authorizationRequestBaseUri + "/" + registration.getRegistrationId()));
         model.addAttribute("urls", oauth2AuthenticationUrls);
 
-        return "login";
+        return "acho";
     }
 
-    @GetMapping("/login/{oauth2}")
+    @GetMapping("/acho/{oauth2}")
     public String loginGoogle(@PathVariable String oauth2, HttpServletResponse httpServletResponse){
         return "redirect:/oauth2/authorization/" + oauth2;
     }

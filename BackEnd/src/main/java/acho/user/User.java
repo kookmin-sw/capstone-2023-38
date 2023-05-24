@@ -1,4 +1,4 @@
-package login.user;
+package acho.user;
 
 import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;

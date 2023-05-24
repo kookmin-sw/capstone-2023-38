@@ -27,7 +27,7 @@ import java.io.IOException;
 @Slf4j
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
-    private static final String NO_CHECK_URL = "/login";
+    private static final String NO_CHECK_URL = "/acho";
 
     private final JwtService jwtService;
     private final UserRepository userRepository;

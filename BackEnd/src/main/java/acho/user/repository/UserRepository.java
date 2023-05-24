@@ -1,6 +1,6 @@
-package login.user.repository;
+package acho.user.repository;
 
-import login.user.User;
+import acho.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
