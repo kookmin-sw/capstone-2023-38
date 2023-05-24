@@ -1,4 +1,4 @@
-package login.domain;
+package acho.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

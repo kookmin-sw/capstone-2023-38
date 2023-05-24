@@ -1,4 +1,4 @@
-package login.oauth2.userinfo;
+package acho.oauth2.userinfo;
 
 import java.util.Map;
 

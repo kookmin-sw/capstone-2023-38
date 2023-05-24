@@ -1,18 +1,22 @@
-package login.Controller;
+package acho.Controller;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.*;
+
+import io.swagger.v3.oas.annotations.Operation;
+import acho.domain.Feed;
+import acho.domain.Like;
+import acho.domain.User;
+import acho.repository.FeedRepository;
+import acho.repository.LikeRepository;
+import acho.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 
 @Slf4j
@@ -27,78 +31,67 @@ public class MyLikeImgController {
     @Value("${cloud.aws.s3.bucket2}")
     private String bucket2;
 
+    @Autowired
+    private final LikeRepository likeRepository;
+
+    @Autowired
+    private final UserRepository userRepository;
+
+    @Autowired
+    private final FeedRepository feedRepository;
+
     @GetMapping("/getMylike/{id}")
-    public ResponseEntity<List<Map<String, Object>>> getImageUrlsById(@PathVariable String id) throws IOException {
+    @Operation(summary = "내가 좋아요 누른 게시물을 보여주는 기능 - 완료")
+    public ResponseEntity<List<Map<String, Object>>> getImageUrlsById(@PathVariable String id) {
         List<Map<String, Object>> response = new ArrayList<>();
         List<Map<String, Object>> imageUrls = new ArrayList<>();
 
-        List<S3ObjectSummary> s3ObjectSummaries = amazonS3.listObjects(bucket2).getObjectSummaries();
+        User user = userRepository.findByUserId(id);
+        List<Like> likes = likeRepository.findByUser(user);
 
         int count = 1;
-        for (S3ObjectSummary s3ObjectSummary : s3ObjectSummaries) {
-            String fileName = s3ObjectSummary.getKey();
-            S3Object s3Object = amazonS3.getObject(bucket2, fileName);
-            ObjectMetadata objectMetadata = s3Object.getObjectMetadata();
+        for (Like like : likes) {
+            Feed feed = like.getFeed();
+            String imageUrl = feed.getUrl();
 
-            // Check if "liked-by" metadata contains the given id
-            String likedBy = objectMetadata.getUserMetaDataOf("liked-by");
-            if (Arrays.asList(likedBy.split(",")).contains(id)) {
-                Map<String, Object> imageMap = new LinkedHashMap<>();
-                imageMap.put("number", count);
-                imageMap.put("imgsrc", amazonS3.getUrl(bucket2, fileName).toString());
-                imageMap.put("user-id", objectMetadata.getUserMetaDataOf("user-id"));
-                imageMap.put("upload-time", objectMetadata.getUserMetaDataOf("upload-time"));
-                imageMap.put("wcount", objectMetadata.getUserMetaDataOf("wcount"));
-                imageMap.put("acount", objectMetadata.getUserMetaDataOf("acount"));
+            Map<String, Object> imageMap = new LinkedHashMap<>();
+            imageMap.put("number", count);
+            imageMap.put("imgsrc", imageUrl);
+            imageMap.put("imageUserId", feed.getUser().getUserId());
+            imageMap.put("upload-time", feed.getUploadTime().toString());
+            imageMap.put("like", feed.getLikeCount());
 
-                imageUrls.add(imageMap);
-                count++;
-            }
+            imageUrls.add(imageMap);
+            count++;
         }
-        Map<String, Object> idImageMap = new LinkedHashMap<>(); // LinkedHashMap 사용
+
+        Map<String, Object> idImageMap = new LinkedHashMap<>();
         idImageMap.put("id", id);
         idImageMap.put("images", imageUrls);
 
         response.add(idImageMap);
         return ResponseEntity.ok(response);
     }
-    @DeleteMapping("/deliteMylike/{id}") //내가 좋아요 누른 목록에서 이미지를 삭제하는 기능
-    public ResponseEntity<Void> deleteImage(@RequestParam("imageUrl") String imageUrl, @PathVariable String id) {
-        try {
-            String bucket = bucket2;
-            String key = getImageKeyFromUrl(imageUrl);
-            ObjectMetadata metadata = amazonS3.getObjectMetadata(bucket, key);
 
-            String likedBy = metadata.getUserMetaDataOf("liked-by");
-            if (likedBy != null && likedBy.contains(id)) {
+    @DeleteMapping("/deleteLike/{id}")
+    @Operation(summary = "좋아요 누른 목록에서 삭제 - 완료")
+    public ResponseEntity<Void> deleteLikeRecord(@PathVariable String id, @RequestParam("imageUrl") String imageUrl) {
+        User user = userRepository.findByUserId(id);
+        Feed feed = feedRepository.findByUrl(imageUrl);
 
-                List<String> likedByList = new ArrayList<>(Arrays.asList(likedBy.split(",")));
-                likedByList.remove(id);
-                String updatedLikedBy = String.join(",", likedByList);
+        if (user != null && feed != null) {
+            Like like = likeRepository.findByUserAndFeed(user, feed);
 
-                ObjectMetadata newMetadata = new ObjectMetadata();
-                for (Map.Entry<String, String> entry : metadata.getUserMetadata().entrySet()) {
-                    newMetadata.addUserMetadata(entry.getKey(), entry.getValue());
-                }
-
-                newMetadata.addUserMetadata("liked-by", updatedLikedBy);
-
-                CopyObjectRequest copyObjectRequest = new CopyObjectRequest(bucket, key, bucket, key)
-                        .withNewObjectMetadata(newMetadata)
-                        .withCannedAccessControlList(CannedAccessControlList.PublicRead);
-                amazonS3.copyObject(copyObjectRequest);
+            if (like != null) {
+                likeRepository.delete(like);
+                int likeCount = feed.getLikeCount();
+                likeCount--;
+                feed.setLikeCount(likeCount);
+                feedRepository.save(feed);
+                return ResponseEntity.ok().build();
             }
-
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    }
 
-    private String getImageKeyFromUrl(String imageUrl) throws MalformedURLException {
-        URL url = new URL(imageUrl);
-        String path = url.getPath();
-        return path.substring(1);
+        return ResponseEntity.notFound().build();
     }
 }

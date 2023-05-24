@@ -1,10 +1,10 @@
-package login.oauth2.service;
+package acho.oauth2.service;
 
-import login.oauth2.CustomOAuth2User;
-import login.oauth2.OAuthAttributes;
-import login.user.SocialType;
-import login.user.User;
-import login.user.repository.UserRepository;
+import acho.oauth2.CustomOAuth2User;
+import acho.oauth2.OAuthAttributes;
+import acho.user.SocialType;
+import acho.domain.User;
+import acho.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

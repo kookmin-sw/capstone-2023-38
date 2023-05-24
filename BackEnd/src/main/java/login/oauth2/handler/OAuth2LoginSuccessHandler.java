@@ -1,12 +1,12 @@
-package login.oauth2.handler;
+package acho.oauth2.handler;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import login.oauth2.CustomOAuth2User;
-import login.user.Role;
-import login.user.repository.UserRepository;
-import login.jwt.service.JwtService;
+import acho.oauth2.CustomOAuth2User;
+import acho.user.Role;
+import acho.repository.UserRepository;
+import acho.jwt.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -36,14 +36,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
             userRepository.findByEmail(oAuth2User.getEmail())
                     .ifPresentOrElse(
-                            user -> response.addHeader("recogid", user.getRecogID()),
+                            user -> response.addHeader("userid", user.getUserId()),
                             () -> new Exception("Can Not Found.")
                     );
             String url ="http://192.168.200.194:3000/main";
             String Authorization = response.getHeader("Authorization");
-            String recogid = response.getHeader("recogid");
+            String recogid = response.getHeader("userid");
             response.addHeader("Access-Control-Allow-Origin", "*");
-            response.sendRedirect(url + "?authorization=" + Authorization + "&recogid=" + recogid);
+            response.sendRedirect(url + "?authorization=" + Authorization + "&userid=" + recogid);
           //  response.sendRedirect("/");
             System.out.println("login success!!!");
         } catch (Exception e) {
@@ -51,8 +51,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         }
 
     }
-
-    // TODO : 소셜 로그인 시에도 무조건 토큰 생성하지 말고 JWT 인증 필터처럼 RefreshToken 유/무에 따라 다르게 처리해보기
     private void loginSuccess(HttpServletResponse response, CustomOAuth2User oAuth2User) throws IOException {
         String accessToken = jwtService.createAccessToken(oAuth2User.getEmail());
         String refreshToken = jwtService.createRefreshToken();

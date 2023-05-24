@@ -1,16 +1,12 @@
-package login.config;
+package acho.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import login.oauth2.handler.OAuth2LoginFailureHandler;
-import login.oauth2.handler.OAuth2LoginSuccessHandler;
-import login.oauth2.service.CustomOAuth2UserService;
-import login.user.repository.UserRepository;
-import login.jwt.filter.JwtAuthenticationProcessingFilter;
-import login.jwt.service.JwtService;
-//import login.oauthtest4.global.login.filter.CustomJsonUsernamePasswordAuthenticationFilter;
-//import login.oauthtest4.global.login.handler.LoginFailureHandler;
-//import login.oauthtest4.global.login.handler.LoginSuccessHandler;
-//import login.oauthtest4.global.login.service.LoginService;
+import acho.oauth2.handler.OAuth2LoginFailureHandler;
+import acho.oauth2.handler.OAuth2LoginSuccessHandler;
+import acho.oauth2.service.CustomOAuth2UserService;
+import acho.repository.UserRepository;
+import acho.jwt.filter.JwtAuthenticationProcessingFilter;
+import acho.jwt.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -80,7 +76,7 @@ public class SecurityConfig {
         corsConfiguration.setAllowedHeaders(List.of("*"));
         corsConfiguration.setExposedHeaders(List.of("*"));
         corsConfiguration.setAllowCredentials(true);
-
+    
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
 

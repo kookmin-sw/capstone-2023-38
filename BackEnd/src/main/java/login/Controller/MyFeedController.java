@@ -1,18 +1,19 @@
-package login.Controller;
+package acho.Controller;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
+import io.swagger.v3.oas.annotations.Operation;
+import acho.domain.Feed;
+import acho.domain.User;
+import acho.repository.FeedRepository;
+import acho.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.*;
 
 @Slf4j
@@ -24,51 +25,65 @@ public class MyFeedController {
     private final AmazonS3 amazonS3;
     private final Functions functions;
 
-    @Value("${cloud.aws.s3.bucket2}")
-    private String bucket2;
+    @Autowired
+    private final UserRepository userRepository;
 
+    @Autowired
+    private final FeedRepository feedRepository;
     @GetMapping("/getMYfeed/{id}")  //feedpage 버킷에서 내가 올린 게시글 이미지만 조회
-    public ResponseEntity<List<Map<String, Object>>> getImageUrlsById(@PathVariable String id) throws IOException {
+    @Operation(summary = "피드 페이지에 내가 올린 게시물만 보여주는 기능 - 완료")
+    public ResponseEntity<List<Map<String, Object>>> getFeedById(@PathVariable String id) {
         List<Map<String, Object>> response = new ArrayList<>();
-        List<Map<String, Object>> imageUrls = new ArrayList<>();
+        List<Map<String, Object>> feedData = new ArrayList<>();
 
-        List<S3ObjectSummary> s3ObjectSummaries = amazonS3.listObjects(bucket2).getObjectSummaries();
+        User user = userRepository.findByUserId(id);
+        List<Feed> feeds = feedRepository.findByUser(user);
 
         int count = 1;
-        for (S3ObjectSummary s3ObjectSummary : s3ObjectSummaries) {
-            String fileName = s3ObjectSummary.getKey();
-            S3Object s3Object = amazonS3.getObject(bucket2, fileName);
-            ObjectMetadata objectMetadata = s3Object.getObjectMetadata();
-
-            String userId = objectMetadata.getUserMetaDataOf("user-id");
-
-            if (userId.equals(id)) {
-                String imageLink = amazonS3.getUrl(bucket2, fileName).toString();
-                Map<String, Object> imageMap = new HashMap<>();
-                imageMap.put("number", count);
-                imageMap.put("imgsrc", imageLink);
-                imageUrls.add(imageMap);
-                count++;
-            }
+        for (Feed feed : feeds) {
+            Map<String, Object> feedMap = new LinkedHashMap<>();
+            feedMap.put("number", count);
+            feedMap.put("imgsrc", feed.getUrl());
+            feedMap.put("upload-time", feed.getUploadTime());
+            feedMap.put("like", feed.getLikeCount());
+            feedData.add(feedMap);
+            count++;
         }
 
-        Map<String, Object> idImageMap = new LinkedHashMap<>(); // LinkedHashMap 사용
-        idImageMap.put("id", id);
-        idImageMap.put("images", imageUrls);
+        Map<String, Object> idFeedMap = new LinkedHashMap<>();
+        idFeedMap.put("id", id);
+        idFeedMap.put("feeds", feedData);
 
-        response.add(idImageMap);
+        response.add(idFeedMap);
 
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/deliteMyfeed")  //feedpage 버킷에서 내가 올린 게시글 이미지를 삭제
+    @DeleteMapping("/deleteMyfeed")
+    @Operation(summary = "마이 피드에서 이미지를 삭제하는 기능 - 완료")
     public ResponseEntity<Void> deleteImage(@RequestParam("imageUrl") String imageUrl) {
         try {
-            functions.deleteMyfeed(imageUrl);
+            // URL에서 버킷, 폴더 및 파일 이름 추출
+            String bucketName = functions.getBucketNameFromUrl2(imageUrl);
+            String fileName = functions.getFileNameFromUrl2(imageUrl);
+
+            System.out.println("Bucket Name: " + bucketName);
+            System.out.println("File Name: " + fileName);
+
+            // S3에서 이미지 삭제
+            functions.deleteImageFromS32(bucketName, fileName);
+
+
+            Feed feed = feedRepository.findByUrl("https://" + bucketName +  ".s3.ap-northeast-2.amazonaws.com/" + fileName);
+            if (feed != null) {
+                feedRepository.delete(feed);
+            }
+
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
 }

@@ -1,4 +1,4 @@
-package login.Controller;
+package acho.Controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +25,6 @@ public class AI {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String AIserverUrl = "http://172.30.1.68:9900/classify";
-            //String classifyRequest = AIserverUrl + "/classify";
             Map<String, String> requestBody = new HashMap<>();
             String fileName = file.getOriginalFilename();
             ByteArrayResource resource = new ByteArrayResource(file.getBytes()) {

@@ -1,10 +1,11 @@
-package login.jwt.service;
+package acho.jwt.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import login.user.repository.UserRepository;
+import acho.domain.User;
+import acho.repository.UserRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -90,11 +91,10 @@ public class JwtService {
 
     public Optional<String> extractEmail(String accessToken) {
         try {
-            // 토큰 유효성 검사하는 데에 사용할 알고리즘이 있는 JWT verifier builder 반환
             return Optional.ofNullable(JWT.require(Algorithm.HMAC512(secretKey))
-                    .build() // 반환된 빌더로 JWT verifier 생성
-                    .verify(accessToken) // accessToken을 검증하고 유효하지 않다면 예외 발생
-                    .getClaim(EMAIL_CLAIM) // claim(Emial) 가져오기
+                    .build()
+                    .verify(accessToken)
+                    .getClaim(EMAIL_CLAIM)
                     .asString());
         } catch (Exception e) {
             log.error("AccessToken is not valid!");
@@ -110,12 +110,15 @@ public class JwtService {
         response.setHeader(refreshHeader, refreshToken);
     }
 
-    public void updateRefreshToken(String email, String refreshToken) {
-        userRepository.findByEmail(email)
-                .ifPresentOrElse(
-                        user -> user.updateRefreshToken(refreshToken),
-                        () -> new Exception("Can Not Found.")
-                );
+    public void updateRefreshToken(String email, String refreshToken){
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.updateRefreshToken(refreshToken);
+            userRepository.save(user);
+        } else {
+
+        }
     }
 
     public boolean isTokenValid(String token) {

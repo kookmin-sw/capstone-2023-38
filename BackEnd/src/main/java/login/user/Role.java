@@ -1,4 +1,4 @@
-package login.user;
+package acho.user;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

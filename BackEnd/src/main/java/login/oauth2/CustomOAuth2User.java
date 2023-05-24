@@ -1,6 +1,6 @@
-package login.oauth2;
+package acho.oauth2;
 
-import login.user.Role;
+import acho.user.Role;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;

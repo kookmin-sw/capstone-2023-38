@@ -1,4 +1,4 @@
-package login.user;
+package acho.user;
 
 public enum SocialType {
     GOOGLE

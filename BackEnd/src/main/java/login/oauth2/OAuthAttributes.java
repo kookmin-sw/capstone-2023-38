@@ -1,11 +1,11 @@
-package login.oauth2;
+package acho.oauth2;
 
 
-import login.oauth2.userinfo.GoogleOAuth2UserInfo;
-import login.oauth2.userinfo.OAuth2UserInfo;
-import login.user.Role;
-import login.user.SocialType;
-import login.user.User;
+import acho.oauth2.userinfo.GoogleOAuth2UserInfo;
+import acho.oauth2.userinfo.OAuth2UserInfo;
+import acho.user.Role;
+import acho.user.SocialType;
+import acho.domain.User;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -38,7 +38,7 @@ public class OAuthAttributes {
 
     public User toEntity(SocialType socialType, OAuth2UserInfo oauth2UserInfo) {
         return User.builder()
-                .recogID(UUID.randomUUID().toString())
+                .userId(UUID.randomUUID().toString())
                 .socialType(socialType)
                 .email(oauth2UserInfo.getEmail())
                 .nickname(oauth2UserInfo.getNickname())

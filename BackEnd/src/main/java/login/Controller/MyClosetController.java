@@ -1,11 +1,13 @@
-package login.Controller;
+package acho.Controller;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
+import acho.domain.MyCloset;
+import acho.domain.User;
+import acho.repository.MyClosetRepository;
+import acho.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,8 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import io.swagger.v3.oas.annotations.Operation;
 
-import java.io.IOException;
 import java.util.*;
 
 @Slf4j
@@ -23,10 +25,15 @@ import java.util.*;
 @RequestMapping("/api")
 @EnableScheduling
 public class MyClosetController {
+    private AI ai;
     private final AmazonS3 amazonS3;
     private final Functions functions;
 
-    private final AI ai;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private MyClosetRepository myClosetRepository;
 
     @Value("${cloud.aws.s3.bucket4}")
     private String bucket4;
@@ -39,30 +46,33 @@ public class MyClosetController {
     private String bucket4_shoes;
     @Value("${cloud.aws.s3.bucket4}/bottom")
     private String bucket4_bottom;
+    @Value("${cloud.aws.s3.bucket4}/accessory")
+    private String bucket4_accessory;
 
     @GetMapping("/getMycloset2/{id}")
-    public ResponseEntity<Map<String, Object>> getImageUrlsById2(@PathVariable String id) throws IOException {
-        List<S3ObjectSummary> s3ObjectSummaries = amazonS3.listObjects(bucket4).getObjectSummaries();
+    @Operation(summary = "내 옷장을 보여주는 기능, 이미지는 S3로부터 데이터는 mysql로부터 - 완료")
+    public ResponseEntity<Map<String, Object>> getImageUrlsById2(@PathVariable String id) {
+        User user = userRepository.findByUserId(id);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<MyCloset> myClosetList = myClosetRepository.findByUser(user);
         Map<String, List<Map<String, Object>>> imageUrlsByCategory = new HashMap<>();
         Map<String, Integer> imageCountByCategory = new HashMap<>();
-        Arrays.asList("top", "bottom", "outer", "shoes").forEach(category -> imageCountByCategory.put(category, 1));
-        for (S3ObjectSummary s3ObjectSummary : s3ObjectSummaries) {
-            String fileName = s3ObjectSummary.getKey();
-            S3Object s3Object = amazonS3.getObject(bucket4, fileName);
-            ObjectMetadata objectMetadata = s3Object.getObjectMetadata();
-            String userId = objectMetadata.getUserMetaDataOf("user-id");
-            if (userId != null && userId.equals(id)) {
-                String imageLink = amazonS3.getUrl(bucket4, fileName).toString();
-                String folderName = fileName.split("/")[0];
-                String categoryName = getCategoryName(folderName);
+        Arrays.asList("top", "bottom", "outer", "shoes", "accessory").forEach(category -> imageCountByCategory.put(category, 1));
 
-                Map<String, Object> imageInfo = new HashMap<>();
-                imageInfo.put("number", imageCountByCategory.get(categoryName));
-                imageInfo.put("imgsrc", imageLink);
-                imageCountByCategory.put(categoryName, imageCountByCategory.get(categoryName) + 1);
+        for (MyCloset myCloset : myClosetList) {
+            String imageUrl = myCloset.getUrl();
+            MyCloset.ClothingCategory category = myCloset.getCategory();
+            String categoryName = category.name().toLowerCase();
 
-                imageUrlsByCategory.computeIfAbsent(categoryName, k -> new ArrayList<>()).add(imageInfo);
-            }
+            Map<String, Object> imageInfo = new HashMap<>();
+            imageInfo.put("number", imageCountByCategory.get(categoryName));
+            imageInfo.put("imgsrc", imageUrl);
+            imageCountByCategory.put(categoryName, imageCountByCategory.get(categoryName) + 1);
+
+            imageUrlsByCategory.computeIfAbsent(categoryName, k -> new ArrayList<>()).add(imageInfo);
         }
 
         Map<String, Object> response = new LinkedHashMap<>();
@@ -71,18 +81,38 @@ public class MyClosetController {
         return ResponseEntity.ok(response);
     }
 
+
     private String getCategoryName(String folderName) {
         if (folderName.contains("top")) return "top";
         if (folderName.contains("bottom")) return "bottom";
         if (folderName.contains("outer")) return "outer";
         if (folderName.contains("shoes")) return "shoes";
+        if (folderName.contains("accessory")) return "accessory";
         return "etc";
     }
 
-    @DeleteMapping("/deleteMyCloset")  //내 옷장에서 이미지를 삭제하는 기능
+    @DeleteMapping("/deleteMyCloset")
+    @Operation(summary = "내 옷장에서 이미지를 삭제하는 기능 - 완료")
     public ResponseEntity<Void> deleteImage(@RequestParam("imageUrl") String imageUrl) {
         try {
-            functions.deleteMycloset(imageUrl);
+            // URL에서 버킷, 폴더 및 파일 이름 추출
+            String bucketName = functions.getBucketNameFromUrl(imageUrl);
+            String folderName = functions.getFolderNameFromUrl(imageUrl);
+            String fileName = functions.getFileNameFromUrl(imageUrl);
+
+            System.out.println("Bucket Name: " + bucketName);
+            System.out.println("Folder Name: " + folderName);
+            System.out.println("File Name: " + fileName);
+
+            // S3에서 이미지 삭제
+            functions.deleteImageFromS3(bucketName, folderName, fileName);
+
+            // mycloset 테이블에서 해당 이미지 정보 삭제
+            MyCloset myCloset = myClosetRepository.findByUrl("https://s3.ap-northeast-2.amazonaws.com/" + bucketName + "/" + folderName + "/" + fileName);
+            if (myCloset != null) {
+                myClosetRepository.delete(myCloset);
+            }
+
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             e.printStackTrace();
@@ -90,31 +120,90 @@ public class MyClosetController {
         }
     }
 
-    @PostMapping(value = "/uploadTempCloset_OUTER", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public String uploadImages(@RequestParam("files") List<MultipartFile> files, @RequestParam("userid") String userId) {
-        return functions.uploadImagesToBucket(bucket4_outer, files, userId);
-    }
-
-    @PostMapping(value = "/uploadTempCloset_TOP", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public String uploadImages2(@RequestParam("files") List<MultipartFile> files, @RequestParam("userid") String userId) {
-        String res = "Fail";
-        String expected = "top";
+    @PostMapping(value = "/outer/upload", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @Operation(summary = "outer 카테고리에 이미지를 저장하고 데이터는 mysql에 저장 - 완료")
+    public String uploadOuterImagesToBucket(
+            @RequestParam("files") List<MultipartFile> files,
+            @RequestParam("userId") String userId
+    ) {
+        String result = "Wrong Category";
+        String expected = "outer";
         for (MultipartFile file : files) {
-            res = ai.classify(file, expected);
-            if(res.equals("top")){
-                functions.uploadImagesToBucket(bucket4_top, files, userId);
+            result = ai.classify(file, expected);
+            if(result.equals(expected)){
+                functions.uploadImagesS3andMysql(files, userId, MyCloset.ClothingCategory.OUTER, bucket4_outer);
             }
         }
-        return res;
+        return result;
+        //return functions.uploadImagesS3andMysql(files, userId, MyCloset.ClothingCategory.OUTER, bucket4_outer);
     }
 
-    @PostMapping(value = "/uploadTempCloset_BOTTOM", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public String uploadImages3(@RequestParam("files") List<MultipartFile> files, @RequestParam("userid") String userId) {
-        return functions.uploadImagesToBucket(bucket4_bottom, files, userId);
+    @PostMapping(value = "/top/upload", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @Operation(summary = "top 카테고리에 이미지를 저장하고 데이터는 mysql에 저장 - 완료")
+    public String uploadTopImagesToBucket(
+            @RequestParam("files") List<MultipartFile> files,
+            @RequestParam("userId") String userId
+    ) {
+        String result = "Wrong Category";
+        String expected = "top";
+        for (MultipartFile file : files) {
+            result = ai.classify(file, expected);
+            if(result.equals(expected)){
+                functions.uploadImagesS3andMysql(files, userId, MyCloset.ClothingCategory.OUTER, bucket4_top);
+            }
+        }
+        return result;
     }
 
-    @PostMapping(value = "/uploadTempCloset_SHOES", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public String uploadImages4(@RequestParam("files") List<MultipartFile> files, @RequestParam("userid") String userId) {
-        return functions.uploadImagesToBucket(bucket4_shoes, files, userId);
+    @PostMapping(value = "/bottom/upload", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @Operation(summary = "bottom 카테고리에 이미지를 저장하고 데이터는 mysql에 저장 - 완료")
+    public String uploadBottomImagesToBucket(
+            @RequestParam("files") List<MultipartFile> files,
+            @RequestParam("userId") String userId
+    ) {
+        String result = "Wrong Category";
+        String expected = "bottom";
+        for (MultipartFile file : files) {
+            result = ai.classify(file, expected);
+            if(result.equals(expected)){
+                functions.uploadImagesS3andMysql(files, userId, MyCloset.ClothingCategory.OUTER, bucket4_bottom);
+            }
+        }
+        return result;
     }
+
+    @PostMapping(value = "/shoes/upload", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @Operation(summary = "shoes 카테고리에 이미지를 저장하고 데이터는 mysql에 저장 - 완료")
+    public String uploadShoesImagesToBucket(
+            @RequestParam("files") List<MultipartFile> files,
+            @RequestParam("userId") String userId
+    ) {
+        String result = "Wrong Category";
+        String expected = "shoes";
+        for (MultipartFile file : files) {
+            result = ai.classify(file, expected);
+            if(result.equals(expected)){
+                functions.uploadImagesS3andMysql(files, userId, MyCloset.ClothingCategory.OUTER, bucket4_shoes);
+            }
+        }
+        return result;
+    }
+
+    @PostMapping(value = "/accessory/upload", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @Operation(summary = "accessory 카테고리에 이미지를 저장하고 데이터는 mysql에 저장 - 완료")
+    public String uploadAccessoryImagesToBucket(
+            @RequestParam("files") List<MultipartFile> files,
+            @RequestParam("userId") String userId
+    ) {
+        String result = "Wrong Category";
+        String expected = "accessory";
+        for (MultipartFile file : files) {
+            result = ai.classify(file, expected);
+            if(result.equals(expected)){
+                functions.uploadImagesS3andMysql(files, userId, MyCloset.ClothingCategory.OUTER, bucket4_accessory);
+            }
+        }
+        return result;
+    }
+
 }
