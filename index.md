@@ -8,23 +8,42 @@
 
 ### 프로젝트 기능
 
-- 온라인 옷장 : 꽉찬 장롱속에서, 내가 어떤 옷을 가지고 있는지 모두 파악하고 있기란 쉽지 않습니다. 자신의 옷장의 옷들과 비슷한 옷을 중복 소비하기도 합니다.  에코를 통해 내가 가진 옷을 보다 쉽고 간편하게 확인하여, 중복된 소비를 방지하고 기존 옷들을 토대로 어울리는 옷을 구매하거나 연출하는데도 도움을 줍니다. 바쁜 하루, 무엇을 어떻게 입을지 고민할 필요가 없습니다. 우리 우든튼 에코가 도와줄 테니까요!
+- 온라인 옷장 : 꽉찬 장롱속에서, 내가 어떤 옷을 가지고 있는지 모두 파악하고 있기란 쉽지 않습니다. 자신의 옷장의 옷들과 비슷한 옷을 중복 소비하기도 합니다.  에코를 통해 내가 가진 옷을 보다 쉽고 간편하게 확인하여, 중복된 소비를 방지하고 기존 옷들을 토대로 어울리는 옷을 구매하거나 연출하는데도 도움을 줍니다. 바쁜 하루, 무엇을 어떻게 입을지 고민할 필요가 없습니다.
 
-- 코디 추천 : 어떻게 입을지 고민이 된다면, 지금 내가 입고 싶은 옷의 사진을 업로드 하세요. 그러면 그 옷에 맞춰 입을 아이템들을 우리 에코가 추천해 드립니다. 에코를 통해 보다 쉽고 빠르게, 본인만의 스타일 추천을 받을 수 있습니다. 우리 우든튼 에코를 믿어보세요!
+- 코디 추천 : 어떻게 입을지 고민이 된다면, 지금 내가 입고 싶은 옷의 사진을 업로드 하세요. 그러면 그 옷에 맞춰 입을 아이템들을 우리 에코가 추천해 드립니다. 에코를 통해 보다 쉽고 빠르게, 본인만의 스타일 추천을 받을 수 있습니다.
 
 - 위시리스트 : 우리들의 마음에 드는 코디 결과를 저장해 두었다가 한눈에 볼 수 있습니다.
 
 - 피드 공유 : 추천 받은 코디를 다른 사람들과 공유하는 소통의 장이 마련되어 있습니다. 우리 우든튼 에코를 통해 자신의 코디를 남들에게 뽐내고, 타인의 코디를 참고하는 등 활발한 참여를 해보세요!
 
-## 2. 소개 영상
+### 프로젝트 구성도 
 
-comming soom
+
+
+![img](https://user-images.githubusercontent.com/39543006/240625405-f7540a0d-60cf-4c40-8f33-eb72e2d0766f.png)
+
+
+
+
+## 2. 영상
+
+
+### 소개 영상 
+
+[![Video Label](https://user-images.githubusercontent.com/39543006/240617380-12ac43df-39df-41ef-bbcf-b12dccfbdf16.png)](https://www.youtube.com/watch?v=JwrWO7jmpOc)
+
+###  시연 영상
+
+
+[![Video Label](https://user-images.githubusercontent.com/39543006/240619937-13e83a8c-60d1-46e0-b955-3ba4625caffb.png)](https://www.youtube.com/watch?v=0equyv7iduU)
+
+
 
 ### 3. 팀 소개
 
 |박병규|손문기|육종호|김재민|
 |:---:|:---:|:---:|:---:|
-|<img width="150px" height="150px" src="https://avatars.githubusercontent.com/u/39543006?v=4">|<img width="150px" height="150px" src="https://user-images.githubusercontent.com/39684860/228559034-982cf6f3-403f-44d1-9995-523c69c939db.jpg">|<img width="150px" height="150px" src="https://user-images.githubusercontent.com/39684697/228556629-900760fa-ca27-4361-83bd-dde1c50f8208.jpeg">|<img width="150px" height="150px" src="https://user-images.githubusercontent.com/39516729/228560315-113e897b-68d4-4044-bba0-dfe2a4e2bd20.jpg">|
+|<img width="150px" height="150px" src="https://avatars.githubusercontent.com/u/39543006?v=4">|<img width="150px" height="150px" src="https://user-images.githubusercontent.com/39684860/228559034-982cf6f3-403f-44d1-9995-523c69c939db.jpg">|<img width="150px" height="150px" src="https://user-images.githubusercontent.com/39684697/228556629-900760fa-ca27-4361-83bd-dde1c50f8208.jpeg">|<img width="150px" height="150px" src="https://user-images.githubusercontent.com/39516729/228560315-113e897b-68d4-4044-bba0-dfe2a4e2bd20.jpg">|--|
 |xxxx1612|xxxx1629|xxxx1650|xxxx1592|
 |Team Leader, AI|BackEnd|Front-End, UI/UX 디자인 기획|BackEnd|
 |[Bingurrr](https://github.com/Bingurrr)|--|--|--|
@@ -32,8 +51,5 @@ comming soom
 
 ### 4. 사용법
 
-comming soon
-
-### 5. 기타
 
 
