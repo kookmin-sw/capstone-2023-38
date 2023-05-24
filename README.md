@@ -16,9 +16,18 @@
 
 - 피드 공유 : 추천 받은 코디를 다른 사람들과 공유하는 소통의 장이 마련되어 있습니다. 우리 우든튼 에코를 통해 자신의 코디를 남들에게 뽐내고, 타인의 코디를 참고하는 등 활발한 참여를 해보세요!
 
-## 2. 소개 영상
+## 2. 영상
 
-comming soom
+### 소개 영상 
+
+[![Video Label](https://user-images.githubusercontent.com/39543006/240617380-12ac43df-39df-41ef-bbcf-b12dccfbdf16.png)](https://www.youtube.com/watch?v=JwrWO7jmpOc)
+
+###  시연 영상
+
+
+[![Video Label](https://user-images.githubusercontent.com/39543006/240619937-13e83a8c-60d1-46e0-b955-3ba4625caffb.png)](https://www.youtube.com/watch?v=0equyv7iduU)
+
+
 
 ### 3. 팀 소개
 
@@ -32,10 +41,5 @@ comming soom
 
 ### 4. 사용법
 
-comming soon
-
-### 5. 기타
-
-추가적인 내용은 자유롭게 작성하세요.
 
 
