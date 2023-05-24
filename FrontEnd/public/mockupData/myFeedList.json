@@ -1,0 +1,13 @@
+{
+  "id": "user1",
+  "images": [
+    {
+      "number": 1,
+      "imgsrc": "https://image.msscdn.net/images/codimap/detail/22974/detail_22974_1_500.jpg?202305231805"
+    },
+    {
+      "number": 2,
+      "imgsrc": "https://image.msscdn.net/images/codimap/detail/14563/detail_14563_1_500.jpg?202305232105"
+    }
+  ]
+}
