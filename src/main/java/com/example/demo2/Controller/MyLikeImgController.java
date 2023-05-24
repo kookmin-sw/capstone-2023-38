@@ -2,8 +2,16 @@ package com.example.demo2.Controller;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
+import com.example.demo2.Feed;
+import com.example.demo2.Like;
+import com.example.demo2.User;
+import com.example.demo2.repository.FeedRepository;
+import com.example.demo2.repository.LikeRepository;
+import com.example.demo2.repository.UserRepository;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,33 +35,37 @@ public class MyLikeImgController {
     @Value("${cloud.aws.s3.bucket2}")
     private String bucket2;
 
+    @Autowired
+    private final LikeRepository likeRepository;
+
+    @Autowired
+    private final UserRepository userRepository;
+
     @GetMapping("/getMylike/{id}")
-    public ResponseEntity<List<Map<String, Object>>> getImageUrlsById(@PathVariable String id) throws IOException {
+    @Operation(summary = "내가 좋아요 누른 게시물을 보여주는 기능 - 완료")
+    public ResponseEntity<List<Map<String, Object>>> getImageUrlsById(@PathVariable String id) {
         List<Map<String, Object>> response = new ArrayList<>();
         List<Map<String, Object>> imageUrls = new ArrayList<>();
 
-        List<S3ObjectSummary> s3ObjectSummaries = amazonS3.listObjects(bucket2).getObjectSummaries();
+        User user = userRepository.findByUserId(id);
+        List<Like> likes = likeRepository.findByUser(user);
 
         int count = 1;
-        for (S3ObjectSummary s3ObjectSummary : s3ObjectSummaries) {
-            String fileName = s3ObjectSummary.getKey();
-            S3Object s3Object = amazonS3.getObject(bucket2, fileName);
-            ObjectMetadata objectMetadata = s3Object.getObjectMetadata();
+        for (Like like : likes) {
+            Feed feed = like.getFeed();
+            String imageUrl = feed.getUrl();
 
-            String likedKey = id + "-liked";
-            boolean liked = objectMetadata.getUserMetadata().containsKey(likedKey) && "true".equals(objectMetadata.getUserMetaDataOf(likedKey));
-            if (liked) {
-                Map<String, Object> imageMap = new LinkedHashMap<>();
-                imageMap.put("number", count);
-                imageMap.put("imgsrc", amazonS3.getUrl(bucket2, fileName).toString());
-                imageMap.put("imageUserId", objectMetadata.getUserMetaDataOf("user-id"));
-                imageMap.put("upload-time", objectMetadata.getUserMetaDataOf("upload-time"));
-                imageMap.put("acount", objectMetadata.getUserMetaDataOf("acount"));
+            Map<String, Object> imageMap = new LinkedHashMap<>();
+            imageMap.put("number", count);
+            imageMap.put("imgsrc", imageUrl);
+            imageMap.put("imageUserId", feed.getUser().getUserId());
+            imageMap.put("upload-time", feed.getUploadTime().toString());
+            imageMap.put("like", feed.getLikeCount());
 
-                imageUrls.add(imageMap);
-                count++;
-            }
+            imageUrls.add(imageMap);
+            count++;
         }
+
         Map<String, Object> idImageMap = new LinkedHashMap<>();
         idImageMap.put("id", id);
         idImageMap.put("images", imageUrls);
@@ -62,7 +74,9 @@ public class MyLikeImgController {
         return ResponseEntity.ok(response);
     }
 
+
     @DeleteMapping("/deliteMylike/{id}")
+    @Operation(summary = "좋아요 누른 게시물의 좋아요 취소 및 내가 좋아요 누른 목록 페이지에서 삭제하는 기능")
     public ResponseEntity<Void> deleteImage(@RequestParam("imageUrl") String imageUrl, @PathVariable String id) {
         try {
             String bucket = bucket2;
@@ -97,8 +111,6 @@ public class MyLikeImgController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
-
 
     private String getImageKeyFromUrl(String imageUrl) throws MalformedURLException {
         URL url = new URL(imageUrl);

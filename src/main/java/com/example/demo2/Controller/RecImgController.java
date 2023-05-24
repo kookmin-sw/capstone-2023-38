@@ -1,19 +1,21 @@
 package com.example.demo2.Controller;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.example.demo2.domain.RecStartData;
+import com.example.demo2.MyCloset;
+import com.example.demo2.User;
+import com.example.demo2.repository.MyClosetRepository;
+import com.example.demo2.repository.UserRepository;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.*;
 
 @Slf4j
@@ -25,31 +27,38 @@ public class RecImgController {
     private final AmazonS3 amazonS3;
     private final Functions functions;
 
-    @Value("${cloud.aws.s3.bucket4}")
-    private String bucket4;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private MyClosetRepository myClosetRepository;
+
+    @Value("${cloud.aws.s3.bucket3}")
+    private String bucket3;
     @GetMapping("/getMycloset/{id}")
-    public ResponseEntity<Map<String, Object>> getImageUrlsById2(@PathVariable String id) throws IOException {
-        List<S3ObjectSummary> s3ObjectSummaries = amazonS3.listObjects(bucket4).getObjectSummaries();
+    @Operation(summary = "내 옷장을 보여주는 기능, 이미지는 S3로부터 데이터는 mysql로부터 - 완료")
+    public ResponseEntity<Map<String, Object>> getImageUrlsById2(@PathVariable String id) {
+        User user = userRepository.findByUserId(id);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<MyCloset> myClosetList = myClosetRepository.findByUser(user);
         Map<String, List<Map<String, Object>>> imageUrlsByCategory = new HashMap<>();
         Map<String, Integer> imageCountByCategory = new HashMap<>();
         Arrays.asList("top", "bottom", "outer", "shoes", "accessory").forEach(category -> imageCountByCategory.put(category, 1));
-        for (S3ObjectSummary s3ObjectSummary : s3ObjectSummaries) {
-            String fileName = s3ObjectSummary.getKey();
-            S3Object s3Object = amazonS3.getObject(bucket4, fileName);
-            ObjectMetadata objectMetadata = s3Object.getObjectMetadata();
-            String userId = objectMetadata.getUserMetaDataOf("user-id");
-            if (userId != null && userId.equals(id)) {
-                String imageLink = amazonS3.getUrl(bucket4, fileName).toString();
-                String folderName = fileName.split("/")[0];
-                String categoryName = getCategoryName(folderName);
 
-                Map<String, Object> imageInfo = new HashMap<>();
-                imageInfo.put("number", imageCountByCategory.get(categoryName));
-                imageInfo.put("imgsrc", imageLink);
-                imageCountByCategory.put(categoryName, imageCountByCategory.get(categoryName) + 1);
+        for (MyCloset myCloset : myClosetList) {
+            String imageUrl = myCloset.getUrl();
+            MyCloset.ClothingCategory category = myCloset.getCategory();
+            String categoryName = category.name().toLowerCase();
 
-                imageUrlsByCategory.computeIfAbsent(categoryName, k -> new ArrayList<>()).add(imageInfo);
-            }
+            Map<String, Object> imageInfo = new HashMap<>();
+            imageInfo.put("number", imageCountByCategory.get(categoryName));
+            imageInfo.put("imgsrc", imageUrl);
+            imageCountByCategory.put(categoryName, imageCountByCategory.get(categoryName) + 1);
+
+            imageUrlsByCategory.computeIfAbsent(categoryName, k -> new ArrayList<>()).add(imageInfo);
         }
 
         Map<String, Object> response = new LinkedHashMap<>();
@@ -67,16 +76,12 @@ public class RecImgController {
         return "etc";
     }
 
-    @PostMapping("/uploadRecStart")  //추천 받을 이미지 임시 저장
-    public ResponseEntity<List<String>> uploadImageUrls(@RequestBody RecStartData request) {
-        try {
-            List<String> uploadedImageUrls = functions.uploadUrlsRecStart(request.getImageUrls(), request.getUserId(), request.getSeason());
-            return ResponseEntity.ok(uploadedImageUrls);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    @PostMapping(value = "/wishlist/upload", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @Operation(summary = "위시리스트에 이미지를 저장하고 데이터는 mysql에 저장 - 완료")
+    public String uploadWishlistImagesToBucket(
+            @RequestParam("files") List<MultipartFile> files,
+            @RequestParam("userId") String userId
+    ) {
+        return functions.uploadImagesS3andMysql2(files, userId, bucket3);
     }
-
-
 }
