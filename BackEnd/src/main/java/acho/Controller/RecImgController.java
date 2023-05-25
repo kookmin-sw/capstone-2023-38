@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -26,6 +28,8 @@ import java.util.*;
 public class RecImgController {
     private final AmazonS3 amazonS3;
     private final Functions functions;
+
+    private final AI ai;
 
     @Autowired
     private UserRepository userRepository;
@@ -74,6 +78,13 @@ public class RecImgController {
         if (folderName.contains("shoes")) return "shoes";
         if (folderName.contains("accessory")) return "accessory";
         return "etc";
+    }
+
+    @PostMapping (value = "/recommand", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public byte[] recommandCoordi(
+            @RequestParam("files") List<String> imgList,
+            @RequestParam("text") String text){
+        return ai.recommand(imgList, text).getBody();
     }
 
     @PostMapping(value = "/wishlist/upload", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
