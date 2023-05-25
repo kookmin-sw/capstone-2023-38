@@ -130,8 +130,9 @@ public class MyClosetController {
         String expected = "outer";
         for (MultipartFile file : files) {
             result = ai.classify(file, expected);
-            if(result.equals(expected)){
-                functions.uploadImagesS3andMysql(files, userId, MyCloset.ClothingCategory.OUTER, bucket4_outer);
+            if(!result.equals("Wrong Category")){
+                functions.uploadImagesS3andMysql(files, userId, result, MyCloset.ClothingCategory.OUTER, bucket4_outer);
+                result = "Correct Category";
             }
         }
         return result;
@@ -148,8 +149,9 @@ public class MyClosetController {
         String expected = "top";
         for (MultipartFile file : files) {
             result = ai.classify(file, expected);
-            if(result.equals(expected)){
-                functions.uploadImagesS3andMysql(files, userId, MyCloset.ClothingCategory.OUTER, bucket4_top);
+            if(!result.equals("Wrong Category")){
+                functions.uploadImagesS3andMysql(files, userId, result, MyCloset.ClothingCategory.OUTER, bucket4_top);
+                result = "Correct Category";
             }
         }
         return result;
@@ -165,8 +167,9 @@ public class MyClosetController {
         String expected = "bottom";
         for (MultipartFile file : files) {
             result = ai.classify(file, expected);
-            if(result.equals(expected)){
-                functions.uploadImagesS3andMysql(files, userId, MyCloset.ClothingCategory.OUTER, bucket4_bottom);
+            if(!result.equals("Wrong Category")){
+                functions.uploadImagesS3andMysql(files, userId, result, MyCloset.ClothingCategory.OUTER, bucket4_bottom);
+                result = "Correct Category";
             }
         }
         return result;
@@ -182,8 +185,9 @@ public class MyClosetController {
         String expected = "shoes";
         for (MultipartFile file : files) {
             result = ai.classify(file, expected);
-            if(result.equals(expected)){
-                functions.uploadImagesS3andMysql(files, userId, MyCloset.ClothingCategory.OUTER, bucket4_shoes);
+            if(!result.equals("Wrong Category")){
+                functions.uploadImagesS3andMysql(files, userId, result, MyCloset.ClothingCategory.OUTER, bucket4_shoes);
+                result = "Correct Category";
             }
         }
         return result;
@@ -199,8 +203,9 @@ public class MyClosetController {
         String expected = "accessory";
         for (MultipartFile file : files) {
             result = ai.classify(file, expected);
-            if(result.equals(expected)){
-                functions.uploadImagesS3andMysql(files, userId, MyCloset.ClothingCategory.OUTER, bucket4_accessory);
+            if(!result.equals("Wrong Category")){
+                functions.uploadImagesS3andMysql(files, userId, result, MyCloset.ClothingCategory.OUTER, bucket4_accessory);
+                result = "Correct Category";
             }
         }
         return result;
