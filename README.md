@@ -84,3 +84,8 @@ Many people nowadays are becoming more interested in fashion and striving to cre
 > pip install torchvision
 
 > python total.py 
+
+- AI
+1. node js  설치
+2. npm install
+3. npm start
