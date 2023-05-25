@@ -92,4 +92,10 @@ Many people nowadays are becoming more interested in fashion and striving to cre
 > 
 > pip install torchvision
 
-> python total.py 
+> python total.py
+
+
+
+- BE
+
+> 향후 배포 후 추가 
