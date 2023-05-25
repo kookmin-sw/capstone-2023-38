@@ -85,7 +85,7 @@ Many people nowadays are becoming more interested in fashion and striving to cre
 
 > python total.py 
 
-- AI
+- FE
 1. node js  설치
 2. npm install
 3. npm start
