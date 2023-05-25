@@ -20,6 +20,9 @@ public class MyCloset {
     @Column(nullable = false)
     private String url;
 
+    @Column(nullable = false)
+    private String filePath;
+    
     @Enumerated(EnumType.STRING)
     private ClothingCategory category;
 
