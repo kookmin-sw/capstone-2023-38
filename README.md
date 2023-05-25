@@ -70,3 +70,17 @@ Many people nowadays are becoming more interested in fashion and striving to cre
 
 
 
+
+- AI
+
+> pip install rembg
+> 
+> pip install flask
+> 
+> pip install tensorflow
+> 
+> pip install pytorch
+> 
+> pip install torchvision
+
+> python total.py 
