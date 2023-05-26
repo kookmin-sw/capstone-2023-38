@@ -70,6 +70,15 @@ Many people nowadays are becoming more interested in fashion and striving to cre
 
 
 
+- FE
+
+> node js  설치
+> 
+> npm install
+> 
+> npm start
+
+
 
 - AI
 
@@ -83,9 +92,10 @@ Many people nowadays are becoming more interested in fashion and striving to cre
 > 
 > pip install torchvision
 
-> python total.py 
+> python total.py
 
-- FE
-1. node js  설치
-2. npm install
-3. npm start
+
+
+- BE
+
+> 향후 배포 후 추가 
